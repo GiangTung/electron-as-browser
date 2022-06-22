@@ -1,0 +1,172 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.none {
+  display: none !important;
+}
+
+.line-normal {
+  line-height: normal;
+}
+
+body {
+  background-color: transparent;
+  font-size: 14px;
+}
+
+.container {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  user-select: none;
+}
+
+.add-workspace {
+  position: absolute;
+  top : 34.6vh;
+  left: 24.3vw;
+  width : 29vw;
+  /* height : 7vh; */
+  height : auto;
+  background: #33343A 0% 0% no-repeat padding-box;
+  border-radius: 6px;
+  opacity: 1;
+}
+
+.emoji {
+  position: absolute;
+  top : calc(34.6vh + 70px);
+  left: 24.3vw;
+  width : 29vw;
+  height: auto;
+  background: transparent;
+  border-radius: 8px;
+  opacity: 1;
+  /* border: 1px solid red; */
+}
+
+.add-name {
+  padding-top: 5px;
+  padding-left: 5px;
+  width: 100%;
+  height: 50%;
+  display : flex;
+  /* border: 1px solid red; */
+}
+
+.add-plus {
+  height: 25px;
+  width: 26px;
+  background: #2C3033 0% 0% no-repeat padding-box;
+  border-radius: 4px;
+  opacity: 1;
+  display: flex;
+}
+
+.add-plus:hover {
+  background: #1e2022 0% 0% no-repeat padding-box;
+}
+
+.add-title {
+  margin-left: 10px;
+}
+
+.input-title {
+  width: calc(100% - 10px);
+  height: 25px;
+  background: #33343A 0% 0% no-repeat padding-box;
+  border : 0;
+  outline: none;
+  text-align: left;
+  font: normal normal normal 15px/17px Helvetica Neue;
+  letter-spacing: 0px;
+  color: #707070;
+}
+
+.center-img {
+  margin: auto;
+  display: block;
+}
+
+.container-img {
+  max-height: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.stretch-img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+.add-setting {
+  display: flex;
+  margin: 5px;
+  width: 100%;
+  height: 25px;
+  /* border: 1px solid red; */
+  padding-top: 7px;
+}
+
+.white-area {
+  position: absolute;
+  left : 60.1vw;
+  top : 21.4vh;
+  width: 26.5vw;
+  height: 26.5vh;
+  background: #E4E4E4 0% 0% no-repeat padding-box;
+  border-radius: 8px 8px 0px 0px;
+  opacity: 1;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 15px;
+  display: flex;
+}
+
+.alert-area {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 21.9vw;
+  height: auto;
+}
+
+.alert {
+  width: 100%;
+  height: 4.4vh;
+  background: #4F4D4F 0% 0% no-repeat padding-box;
+  border-radius: 7px;
+  display: flex;
+}
+
+.alert-icon {
+  position: relative;
+  height: 100%;
+  width: 13%;
+}
+
+.alert-close {
+  position: relative;
+  height: 100%;
+  width: 13%;
+}
+
+.alert-content {
+  text-align: left;
+  height: 100%;
+  width: 74%;
+  font: normal normal normal 11px/15px Airbnb Cereal App;
+  letter-spacing: 0px;
+  display: flex;
+  /* border: 1px solid red; */
+}
+
+.origin-center-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}

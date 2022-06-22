@@ -1,0 +1,93 @@
+const { ipcRenderer } = require('electron');
+
+// Used in Renderer process
+
+/**
+ * Tell browser view to load url
+ * @param {string} url
+ */
+const sendEnterURL = url => ipcRenderer.send('url-enter', url);
+const sendNewsite = () => {};
+/**
+ * Tell browser view url in address bar changed
+ * @param {string} url
+ */
+const sendChangeURL = url => ipcRenderer.send('url-change', url);
+
+const sendAct = actName => {
+  ipcRenderer.send('act', actName);
+};
+
+const sendOpenDevTool =()=>{
+  ipcRenderer.send('open-devtools')};
+
+
+/**
+ * Tell browser view to goBack
+ */
+const sendGoBack = () => sendAct('goBack');
+
+/**
+ * Tell browser view to goForward
+ */
+const sendGoForward = () => sendAct('goForward');
+/**
+ * Tell browser view to switch to specified tab
+ * @param {Number} id
+ */
+const sendSwitchTab = id => ipcRenderer.send('switch-tab', id);
+// const sendSwitchTab = id => {alert(id),sendAct('goForward')};
+// const sendSwitchTab=id=> sendAct('goToIndex', 1);
+// Tell browser view to reload
+const sendReload = () => sendAct('reload');
+
+// Tell browser view to stop load
+const sendStop = () => sendAct('stop');
+
+/**
+ * Tell browser view to close tab
+ * @param {TabID} id
+ */
+const sendCloseTab = id => ipcRenderer.send('close-tab', id);
+
+/**
+ * Create a new tab
+ * @param {string} [url]
+ * @param {object} [references]
+ */
+const sendNewTab = (url, references) => ipcRenderer.send('new-tab', url, references);
+/**
+ * Create a new tab
+ * @param {string} url
+ */
+const sendGetfavicon = (url) => ipcRenderer.send('get-favicon', url);
+
+/**
+ * Create a workspace panel
+ * @param {string} [val]
+ */
+ const showWorkspace = val => ipcRenderer.send('show-workspace', val);
+
+ /**
+ * Close the workspace panel
+ * @param {string} [val]
+ */
+ const hideWorkspace = val => ipcRenderer.send('hide-workspace', val);
+
+ const quit = () => ipcRenderer.send('close-all');
+
+module.exports = {
+  sendEnterURL, // sendEnterURL(url) to load url
+  sendChangeURL, // sendChangeURL(url) on addressbar input change
+  sendGoBack,
+  sendGoForward,
+  sendReload,
+  sendStop,
+  sendNewTab, // sendNewTab([url])
+  sendSwitchTab, // sendSwitchTab(toID)
+  sendCloseTab, // sendCloseTab(id)
+  showWorkspace,
+  hideWorkspace,
+  quit,
+  sendOpenDevTool
+};

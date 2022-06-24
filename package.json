@@ -28,7 +28,20 @@
         "start": "electron example/main.js"
     },
     "dependencies": {
-        "electron-log": "^3.0.7"
+        "assert": "^2.0.0",
+        "deep-assign": "^3.0.0",
+        "electron-color-picker-eye-dropper-screen": "^1.0.10",
+        "electron-eyedropper": "^0.1.7",
+        "electron-json-storage": "^4.5.0",
+        "electron-log": "^3.0.7",
+        "events": "^3.3.0",
+        "fs": "^0.0.1-security",
+        "is-jpg": "^3.0.0",
+        "is-png": "^3.0.1",
+        "path": "^0.12.7",
+        "pngparse": "^2.0.1",
+        "puppeteer": "^15.0.1",
+        "use-eye-dropper": "^1.3.5"
     },
     "devDependencies": {
         "@babel/cli": "^7.5.5",

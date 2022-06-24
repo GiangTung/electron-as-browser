@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import ReactDOM, { render } from 'react-dom';
-import cx from 'classnames';
-import useConnect from '../../useConnect';
-import * as action from '../../control';
+import React, { useEffect, useState } from "react";
+import ReactDOM, { render } from "react-dom";
+import cx from "classnames";
+import useConnect from "../../useConnect";
+import * as action from "../../control";
+import useEyeDropper from "use-eye-dropper";
 
 const IconLoading = () => (
   <svg
@@ -105,52 +106,48 @@ function SiteItem(props) {
       href = `http://${href}`;
     }
     action.sendEnterURL(href);
-    
-  }
+  };
   return (
     <li>
       <div
-        className={cx('site-item', { active: id === activeID })}
+        className={cx("site-item", { active: id === activeID })}
         onClick={() => setActiveSite(id)}
       >
-        <div className='site-item-img'>
-          <img className='container-img' src={icon}></img>
+        <div className="site-item-img">
+          <img className="container-img" src={icon}></img>
         </div>
-        <div className='center'><p>{value}</p></div>
+        <div className="center">
+          <p>{value}</p>
+        </div>
       </div>
     </li>
   );
 }
 
 function SiteList(props) {
-
   const list = props.list;
   const activeID = props.activeID;
   const setActiveSiteID = props.setActiveSiteID;
   // alert('dddddddd');
   // console.log(list);
   return (
-    <ul className='site-ul'>
-      {
-        list.map((item, id) =>
-          <SiteItem
-            key={id}
-            icon={item.icon}
-            value={item.value}
-            href = {item.href}
-            id = {id}
-            activeID={activeID}
-            setActiveSiteID = {setActiveSiteID}
-            
-              />
-        )
-      }
+    <ul className="site-ul">
+      {list.map((item, id) => (
+        <SiteItem
+          key={id}
+          icon={item.icon}
+          value={item.value}
+          href={item.href}
+          id={id}
+          activeID={activeID}
+          setActiveSiteID={setActiveSiteID}
+        />
+      ))}
     </ul>
   );
 }
 
 function TaskItem(props) {
-
   const id = props.id;
   const href = props.href;
   const icon = props.icon;
@@ -160,33 +157,35 @@ function TaskItem(props) {
   const time = props.time;
   const activeID = props.activeID;
   const setActiveTaskID = props.setActiveTaskID;
-  const setActiveTask = id => {
+  const setActiveTask = (id) => {
     setActiveTaskID(id);
     action.sendChangeURL(href);
     if (!/^.*?:\/\//.test(href)) {
       href = `http://${href}`;
     }
     action.sendEnterURL(href);
-  }
+  };
 
   return (
     <li>
-      <div
-        className="task-item"
-        onClick={() => setActiveTask(id)}
-        
-      >
-        <div className={cx('task-active-mark', { active: id === activeID })}></div>
-        <div className='task-item-body'>
-          <div className='task-item-top'>
-            <div className={cx('task-item-icon', icon)}>
-              <img className='container-img' src={icon}></img>
+      <div className="task-item" onClick={() => setActiveTask(id)}>
+        <div
+          className={cx("task-active-mark", { active: id === activeID })}
+        ></div>
+        <div className="task-item-body">
+          <div className="task-item-top">
+            <div className={cx("task-item-icon", icon)}>
+              <img className="container-img" src={icon}></img>
             </div>
-            <div className='task-item-title'><p className='line-normal'>{title}</p></div>
-            <div className='task-item-time'>{time}</div>
+            <div className="task-item-title">
+              <p className="line-normal">{title}</p>
+            </div>
+            <div className="task-item-time">{time}</div>
           </div>
-          <div className='task-item-status center'><p>{status}</p></div>
-          <div className='task-item-desc'>{desc}</div>
+          <div className="task-item-status center">
+            <p>{status}</p>
+          </div>
+          <div className="task-item-desc">{desc}</div>
         </div>
       </div>
     </li>
@@ -199,105 +198,145 @@ function TaskList(props) {
   const setActiveTaskID = props.setActiveTaskID;
 
   return (
-    <ul className='task-ul'>
-      {
-        list.map((item, id) =>
-          <TaskItem
-            key={id}
-            id = {id}
-            icon={item.icon}
-            title={item.title}
-            status={item.status}
-            desc={item.desc}
-            time={item.time}
-            href = {item.href}
-            activeID={activeID}
-            setActiveTaskID = {setActiveTaskID}
-          />
-        )
-      }
+    <ul className="task-ul">
+      {list.map((item, id) => (
+        <TaskItem
+          key={id}
+          id={id}
+          icon={item.icon}
+          title={item.title}
+          status={item.status}
+          desc={item.desc}
+          time={item.time}
+          href={item.href}
+          activeID={activeID}
+          setActiveTaskID={setActiveTaskID}
+        />
+      ))}
     </ul>
   );
 }
 let show_Site = undefined;
 function Control() {
   const sites_initial = [
-    {value : "Gmail | devin@honeydu.io", icon : "img/site_list/g-Mail.png",href : "http://www.mail.google.com"},
-    {value : "Github | Honeydu | Mobile", icon : "img/site_list/github.png",href : "http://www.github.com"},
-    {value : "brew install chrome - Google", icon : "img/site_list/google.png", href : "http://www.google.com"},
-    {value : "Youtube", icon : "img/site_list/youtube.png", href : "http:\\youtube.com"},
-    {value : "Implement <hr> into app...", icon : "img/site_list/google.png", href : "http://www.google.com"}
+    {
+      value: "Gmail | devin@honeydu.io",
+      icon: "img/site_list/g-Mail.png",
+      href: "http://www.mail.google.com",
+    },
+    {
+      value: "Github | Honeydu | Mobile",
+      icon: "img/site_list/github.png",
+      href: "http://www.github.com",
+    },
+    {
+      value: "brew install chrome - Google",
+      icon: "img/site_list/google.png",
+      href: "http://www.google.com",
+    },
+    {
+      value: "Youtube",
+      icon: "img/site_list/youtube.png",
+      href: "http:\\youtube.com",
+    },
+    {
+      value: "Implement <hr> into app...",
+      icon: "img/site_list/google.png",
+      href: "http://www.google.com",
+    },
   ];
   const tasks_initial = [
     {
-      title:"Moana Wells",
-      status : "Guitar jams w/ Mark at McCabe’s",
-      desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time : "2:40 PM",
-      icon : "img/task_list/jira.png",
-      href: 'http://www.google.com'
+      title: "Moana Wells",
+      status: "Guitar jams w/ Mark at McCabe’s",
+      desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
+      time: "2:40 PM",
+      icon: "img/task_list/jira.png",
+      href: "http://www.google.com",
     },
     {
-      title:"Youtube",
-      status : "Guitar jams w/ Mark at McCabe’s",
-      desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time : "1:50 PM",
-      icon : "img/task_list/link.png",
-      href: 'http://www.youtube.com'
-    },{
-      title:"Mark Mills",
-      status : "Guitar jams w/ Mark at McCabe’s",
-      desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time : "1:20 PM",
-      icon : "img/task_list/jira.png",
-      href: 'http://www.google.com'
-    },{
-      title:"Jira | DELT 181",
-      status : "Guitar jams w/ Mark at McCabe’s",
-      desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time : "12:40 PM",
-      icon : "img/task_list/jira.png",
-      href: 'http://www.google.com'
-    },{
-      title:"Discord | Honeydu",
-      status : "From: Shan Shah",
-      desc:"@devin what are the name servers for Digital Ocean?",
-      time : "11:40 PM",
-      icon : "img/task_list/discord.png",
-      href: 'http://www.google.com'
-    },{
-      title:"Github | Honeydu",
-      status : "Repo: Mobile      Commit: 6weFwer",
-      desc:"@devin should we change this method to be async?",
-      time : "1:50 AM",
-      icon : "img/task_list/github.png",
-      href: 'http://www.github.com'
-    }
+      title: "Youtube",
+      status: "Guitar jams w/ Mark at McCabe’s",
+      desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
+      time: "1:50 PM",
+      icon: "img/task_list/link.png",
+      href: "http://www.youtube.com",
+    },
+    {
+      title: "Mark Mills",
+      status: "Guitar jams w/ Mark at McCabe’s",
+      desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
+      time: "1:20 PM",
+      icon: "img/task_list/jira.png",
+      href: "http://www.google.com",
+    },
+    {
+      title: "Jira | DELT 181",
+      status: "Guitar jams w/ Mark at McCabe’s",
+      desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
+      time: "12:40 PM",
+      icon: "img/task_list/jira.png",
+      href: "http://www.google.com",
+    },
+    {
+      title: "Discord | Honeydu",
+      status: "From: Shan Shah",
+      desc: "@devin what are the name servers for Digital Ocean?",
+      time: "11:40 PM",
+      icon: "img/task_list/discord.png",
+      href: "http://www.google.com",
+    },
+    {
+      title: "Github | Honeydu",
+      status: "Repo: Mobile      Commit: 6weFwer",
+      desc: "@devin should we change this method to be async?",
+      time: "1:50 AM",
+      icon: "img/task_list/github.png",
+      href: "http://www.github.com",
+    },
   ];
   const task_type = {
-    title:"Jira | DELT 181",
-      status : "Guitar jams w/ Mark at McCabe’s",
-      desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time : "12:40 PM",
-      icon : "img/task_list/jira.png",
-      href: 'http:\\www.google.com'
-  }
+    title: "Jira | DELT 181",
+    status: "Guitar jams w/ Mark at McCabe’s",
+    desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
+    time: "12:40 PM",
+    icon: "img/task_list/jira.png",
+    href: "http:\\www.google.com",
+  };
   const { tabs, tabIDs, activeID } = useConnect();
-  const [ activeSiteID, setActiveSiteID ] = useState(0);
-  const [ activeTaskID, setActiveTaskID ] = useState(0);
-  const [ activeLeftID, setActiveLeftID ] = useState(0);
-  const [ tempID, setTempID ] = useState(0);
-  const [sites,setSites] = useState(sites_initial);
-  const [tasks,setTasks] = useState(tasks_initial);
+  const [activeSiteID, setActiveSiteID] = useState(0);
+  const [activeTaskID, setActiveTaskID] = useState(0);
+  const [activeLeftID, setActiveLeftID] = useState(0);
+  const [tempID, setTempID] = useState(0);
+  const [sites, setSites] = useState(sites_initial);
+  const [tasks, setTasks] = useState(tasks_initial);
   const site_type = {
-    value:"http://www.google.com",
-    icon:"http://www.google\favicon.ico",
-    href:"http://www.google.com"
+    value: "http://www.google.com",
+    icon: "http://www.google\favicon.ico",
+    href: "http://www.google.com",
   };
   console.log(tabs);
-  const { url, canGoForward, canGoBack, isLoading,favicon,href,title } = tabs[activeID] || {};
+  const { url, canGoForward, canGoBack, isLoading, favicon, href, title } =
+    tabs[activeID] || {};
   const [current_Url, setCurrent_Url] = useState(site_type);
-  const onUrlChange = e => {
+
+  const { close, open, isSupported } = useEyeDropper();
+  const [color, setColor] = useState("#666666");
+  const [error, setError] = useState();
+
+  const pickColor = () => {
+    open()
+      .then((color) => {
+        setColor(color.sRGBHex);
+      })
+      .catch((e) => {
+        // Ensures component is still mounted
+        // before calling setState
+        if (!e.canceled) setError(e);
+      });
+  };
+
+  const onUrlChange = (e) => {
     // alert('url changed!');
     // Sync to tab config
     const v = e.target.value;
@@ -307,11 +346,11 @@ function Control() {
     //     }
     // console.log(v);
     // console.log(cur_site);
-    
+
     action.sendChangeURL(v);
     // setCurrent_Url(cur_site);
   };
-  const onPressEnter = e => {
+  const onPressEnter = (e) => {
     if (e.keyCode !== 13) return;
     const v = e.target.value.trim();
     if (!v) return;
@@ -328,188 +367,259 @@ function Control() {
     // action.sendReload();
     // action.sendChangeURL(new_TabUrl);
     // action.sendEnterURL(new_TabUrl);
-  }
-  const close = (e, id) => {
-    e.stopPropagation();
-    action.sendCloseTab(id);
   };
- 
-  const switchTab = value => {
+  // const close = (e, id) => {
+  //   e.stopPropagation();
+  //   action.sendCloseTab(id);
+  // };
+
+  const switchTab = (value) => {
     // action.sendSwitchTab(sites[id].id);
     // console.log(value);
     // alert(value);
     // action.sendChangeURL(value);
     // action.sendEnterURL(value);
   };
-  
-  
-  const addHoneydu = (title,url,favicon) => {
+
+  const addHoneydu = (title, url, favicon) => {
     // alert('click the add btn');
     // alert(url);
     // sites_initial.push(current_Url);
     let new_task = {
-      title:title,
-      status:url,
-      value:url,
-      href : url,
-      icon:favicon
+      title: title,
+      status: url,
+      value: url,
+      href: url,
+      icon: favicon,
     };
     let origin_tasks = tasks;
-    let is =  origin_tasks.find(v=>v.href == new_task.href);
-    if(is == null || is == 0 || is===undefined)
-          origin_tasks.push(new_task)
+    let is = origin_tasks.find((v) => v.href == new_task.href);
+    if (is == null || is == 0 || is === undefined) origin_tasks.push(new_task);
     setTasks(origin_tasks);
-    action.sendReload()
+    action.sendReload();
     // console.log(task);
     // console.log(sites);
-    
-  } 
-  
+  };
 
-  
   const leftTabs = [
-    {icon : "fruit", func : "none"},
-    {icon : "brain", func : "none"},
-    {icon : "face", func : "none"},
-    {icon : "star", func : "none"}
+    { icon: "fruit", func: "none" },
+    { icon: "brain", func: "none" },
+    { icon: "face", func: "none" },
+    { icon: "star", func: "none" },
   ];
 
-  const setLeftID = id => {
+  const setLeftID = (id) => {
     console.log("setLeftID", id);
     setTempID(id);
     setActiveLeftID(id);
   };
   const createNewTab = () => {
     action.sendNewTab();
-  }
+  };
   const goback = () => {
-    
     action.sendGoBack();
-  }
+  };
   const goForward = () => {
     action.sendGoForward();
-  }
-  const showWorkspace = val => {
+  };
+  const showWorkspace = (val) => {
     action.showWorkspace(val);
   };
   const closeTab = () => {
     action.sendCloseTab();
-  }
+  };
+
+  const clipboardLink = (url) => {
+    navigator.clipboard.writeText(url);
+    // alert("Clipboard correctly");
+    action.sendLink(url);
+  };
 
   const quit = () => {
     console.log("quit------------");
     action.quit();
   };
-  
-    
-    return (
-      
-      <div className="container">
-        <div className='st top-bar'>
-          <div className='sys-bar'>
-            <a className="exit"><i className="fa fa-circle exit" onClick={() => quit()}/></a>
-            <a className="minimize"><i className="fa fa-circle" /></a>
-            <a className="maximize"><i className="fa fa-circle" /></a>
-          </div>
-          <div className='ctrl-bar'>
-            <div className='ctrl-bar-unknown normal-clickable'>
-              <img className='center-img' src='img/unknown.png'></img>
-            </div>
-            <div className='ctrl-bar-checker'onClick={() => addHoneydu(title,url,favicon)}></div>
-            <div className='ctrl-bar-plus normal-clickable' onClick={() => createNewTab()}></div>
-            <div className='ctrl-bar-bf'>
-              <div className='ctrl-bar-back normal-clickable' onClick={() => goback()}>
-                <img className='center-img' src='img/Icon-feather-chevron-left.png'></img>
-              </div>
-              <div className='ctrl-bar-forward normal-clickable' onClick={()=>goForward()}>
-                <img className='center-img' src='img/Icon-feather-chevron-right.png'></img>
-              </div>
-            </div>
-            <div className='ctrl-bar-url'>
-              <div className='bar-lock'></div>
-              <input
-                className="bar-address"
-                value={url || ''}
-                onChange={onUrlChange}
-                onKeyDown={onPressEnter}
-              />
-              <div className='fav-icon' >
-                <img src = {favicon}/>
-              </div>
-            </div>
-            <div className='ctrl-bar-refresh normal-clickable' onClick={action.sendReload}></div>
-            <div className='ctrl-bar-cancel normal-clickable' onClick={action.sendStop}></div>
-            <div className='ctrl-bar-mark'></div>
-            <div className='ctrl-bar-tools'>
-              <div className='ctrl-bar-tool-item tool-spotify'></div>
-              <div className='ctrl-bar-tool-item tool-metro-fire'></div>
-              <div className='ctrl-bar-tool-item tool-email'></div>
-              <div className='ctrl-bar-tool-item tool-phone'></div>
-              <div className='ctrl-bar-tool-item tool-camera'></div>
-              <div className='ctrl-bar-tool-item tool-colorize'></div>
-              <div className='ctrl-bar-tool-item tool-code' onClick={action.sendOpenDevTool}></div>
-              <div className='ctrl-bar-tool-item tool-link'></div>
-            </div>
-            <div className='ctrl-bar-unknown1 normal-clickable'>
-              <img className='center-img' src='img/unknown.png'></img>
-            </div>
-          </div>
+
+  return (
+    <div className="container">
+      <div className="st top-bar">
+        <div className="sys-bar">
+          <a className="exit">
+            <i className="fa fa-circle exit" onClick={() => quit()} />
+          </a>
+          <a className="minimize">
+            <i className="fa fa-circle" />
+          </a>
+          <a className="maximize">
+            <i className="fa fa-circle" />
+          </a>
         </div>
-        <div className='body-container'>
-          <div className='left-bar'>
-            <div className='tab-bar'>
-              <>
-                {
-                  leftTabs.map((item, id) => {
-                    const { icon, func } = leftTabs[id] || {};
-                    return (
-                      <div
-                        key={id}
-                        className={cx('tab-item', {active : id === activeLeftID })}
-                        onClick={() => setLeftID(id)}
-                      >
-                        <img className='container-img' src={`img/left_bar/${icon}.png`}></img>
-                      </div>
-                    );
-                  })
-                }
-              </>
-              <div className='tab-plus normal-clickable' onClick={() => showWorkspace("workspace")}>
-                <img className='center-img' src='img/Icon-feather-plus.png'></img>
-              </div>
+        <div className="ctrl-bar">
+          <div className="ctrl-bar-unknown normal-clickable">
+            <img className="center-img" src="img/unknown.png"></img>
           </div>
-            <div className='pin-bar'>
-              <div className='pin-tools'>
-                <div className='pin-tool-item tool-bookmark'></div>
-                <div className='pin-tool-item tool-check'></div>
-                <div className='pin-tool-item tool-chatbubble'></div>
-                <div className='pin-tool-item tool-pmail'></div>
-                <div className='pin-tool-item tool-github'></div>
-              </div>
-            <img className='pin-avatar' src='img/Ellipse2.png'></img>
+          <div
+            className="ctrl-bar-checker"
+            onClick={() => addHoneydu(title, url, favicon)}
+          ></div>
+          <div
+            className="ctrl-bar-plus normal-clickable"
+            onClick={() => createNewTab()}
+          ></div>
+          <div className="ctrl-bar-bf">
+            <div
+              className="ctrl-bar-back normal-clickable"
+              onClick={() => goback()}
+            >
+              <img
+                className="center-img"
+                src="img/Icon-feather-chevron-left.png"
+              ></img>
+            </div>
+            <div
+              className="ctrl-bar-forward normal-clickable"
+              onClick={() => goForward()}
+            >
+              <img
+                className="center-img"
+                src="img/Icon-feather-chevron-right.png"
+              ></img>
             </div>
           </div>
-          <div className='st task-bar'>
-            <div className={cx('site-list', {none : tempID !== 0 })}>
-              <div className='list-name'>Honeydu</div>
-              <SiteList list = {sites} activeID = {activeSiteID} setActiveSiteID={setActiveSiteID}
-                
-              />
-            </div>
-            <div className={cx('task-list', {none : tempID !== 1})}>
-              <div className='list-name'>Tasks</div>
-              <TaskList list = {tasks} activeID = {activeTaskID} setActiveTaskID={setActiveTaskID}/>
+          <div className="ctrl-bar-url">
+            <div className="bar-lock"></div>
+            <input
+              className="bar-address"
+              value={url || ""}
+              onChange={onUrlChange}
+              onKeyDown={onPressEnter}
+            />
+            <div className="fav-icon">
+              <img src={favicon} />
             </div>
           </div>
-          <div className='content-body'>
-            <div className='st content-workspace'></div>
+          <div
+            className="ctrl-bar-refresh normal-clickable"
+            onClick={action.sendReload}
+          ></div>
+          <div
+            className="ctrl-bar-cancel normal-clickable"
+            onClick={action.sendStop}
+          ></div>
+          <div className="ctrl-bar-mark"></div>
+          <div className="ctrl-bar-tools">
+            <div
+              className="ctrl-bar-tool-item tool-spotify"
+              onClick={action.sendSpotify}
+            ></div>
+            <div
+              className="ctrl-bar-tool-item tool-metro-fire"
+              onClick={action.sendDeleteAllCookie}
+            ></div>
+            <div
+              className="ctrl-bar-tool-item tool-email"
+              onClick={action.sendEmail}
+            ></div>
+            <div
+              className="ctrl-bar-tool-item tool-phone"
+              onClick={action.sendPhone}
+            ></div>
+            <div
+              className="ctrl-bar-tool-item tool-camera"
+              onClick={() => action.sendScreenshot(url)}
+            ></div>
+            {isSupported() ? (
+              <div
+                className="ctrl-bar-tool-item fa fa-eyedropper"
+                style={{ color: color, marginLeft: "7px", cursor: "pointer" }}
+                onClick={pickColor}
+              ></div>
+            ) : (
+              <span>EyeDropper API not supported in this browser</span>
+            )}
+            {/* <div
+              className="ctrl-bar-tool-item tool-colorize"
+              onClick={pickColor}
+            ></div> */}
+            <div
+              className="ctrl-bar-tool-item tool-code"
+              onClick={action.sendOpenDevTool}
+            ></div>
+            <div
+              className="ctrl-bar-tool-item tool-link"
+              onClick={() => clipboardLink(url)}
+            ></div>
+          </div>
+          <div className="ctrl-bar-unknown1 normal-clickable">
+            <img className="center-img" src="img/unknown.png"></img>
           </div>
         </div>
       </div>
-    );
-    
+      <div className="body-container">
+        <div className="left-bar">
+          <div className="tab-bar">
+            <>
+              {leftTabs.map((item, id) => {
+                const { icon, func } = leftTabs[id] || {};
+                return (
+                  <div
+                    key={id}
+                    className={cx("tab-item", { active: id === activeLeftID })}
+                    onClick={() => setLeftID(id)}
+                  >
+                    <img
+                      className="container-img"
+                      src={`img/left_bar/${icon}.png`}
+                    ></img>
+                  </div>
+                );
+              })}
+            </>
+            <div
+              className="tab-plus normal-clickable"
+              onClick={() => showWorkspace("workspace")}
+            >
+              <img className="center-img" src="img/Icon-feather-plus.png"></img>
+            </div>
+          </div>
+          <div className="pin-bar">
+            <div className="pin-tools">
+              <div className="pin-tool-item tool-bookmark"></div>
+              <div className="pin-tool-item tool-check"></div>
+              <div className="pin-tool-item tool-chatbubble"></div>
+              <div className="pin-tool-item tool-pmail"></div>
+              <div className="pin-tool-item tool-github"></div>
+            </div>
+            <img className="pin-avatar" src="img/Ellipse2.png"></img>
+          </div>
+        </div>
+        <div className="st task-bar">
+          <div className={cx("site-list", { none: tempID !== 0 })}>
+            <div className="list-name">Honeydu</div>
+            <SiteList
+              list={sites}
+              activeID={activeSiteID}
+              setActiveSiteID={setActiveSiteID}
+            />
+          </div>
+          <div className={cx("task-list", { none: tempID !== 1 })}>
+            <div className="list-name">Tasks</div>
+            <TaskList
+              list={tasks}
+              activeID={activeTaskID}
+              setActiveTaskID={setActiveTaskID}
+            />
+          </div>
+        </div>
+        <div className="content-body">
+          <div className="st content-workspace"></div>
+        </div>
+      </div>
+    </div>
+  );
+
   // });
 }
 
 // eslint-disable-next-line no-undef
-ReactDOM.render(<Control />, document.getElementById('app'));
+ReactDOM.render(<Control />, document.getElementById("app"));

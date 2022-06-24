@@ -10,6 +10,8 @@ var _useConnect = _interopRequireDefault(require("../../useConnect"));
 
 var action = _interopRequireWildcard(require("../../control"));
 
+var _useEyeDropper = _interopRequireDefault(require("use-eye-dropper"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
@@ -110,7 +112,7 @@ function SiteItem(props) {
   };
 
   return _react.default.createElement("li", null, _react.default.createElement("div", {
-    className: (0, _classnames.default)('site-item', {
+    className: (0, _classnames.default)("site-item", {
       active: id === activeID
     }),
     onClick: () => setActiveSite(id)
@@ -169,7 +171,7 @@ function TaskItem(props) {
     className: "task-item",
     onClick: () => setActiveTask(id)
   }, _react.default.createElement("div", {
-    className: (0, _classnames.default)('task-active-mark', {
+    className: (0, _classnames.default)("task-active-mark", {
       active: id === activeID
     })
   }), _react.default.createElement("div", {
@@ -177,7 +179,7 @@ function TaskItem(props) {
   }, _react.default.createElement("div", {
     className: "task-item-top"
   }, _react.default.createElement("div", {
-    className: (0, _classnames.default)('task-item-icon', icon)
+    className: (0, _classnames.default)("task-item-icon", icon)
   }, _react.default.createElement("img", {
     className: "container-img",
     src: icon
@@ -244,42 +246,42 @@ function Control() {
     desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
     time: "2:40 PM",
     icon: "img/task_list/jira.png",
-    href: 'http://www.google.com'
+    href: "http://www.google.com"
   }, {
     title: "Youtube",
     status: "Guitar jams w/ Mark at McCabe’s",
     desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
     time: "1:50 PM",
     icon: "img/task_list/link.png",
-    href: 'http://www.youtube.com'
+    href: "http://www.youtube.com"
   }, {
     title: "Mark Mills",
     status: "Guitar jams w/ Mark at McCabe’s",
     desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
     time: "1:20 PM",
     icon: "img/task_list/jira.png",
-    href: 'http://www.google.com'
+    href: "http://www.google.com"
   }, {
     title: "Jira | DELT 181",
     status: "Guitar jams w/ Mark at McCabe’s",
     desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
     time: "12:40 PM",
     icon: "img/task_list/jira.png",
-    href: 'http://www.google.com'
+    href: "http://www.google.com"
   }, {
     title: "Discord | Honeydu",
     status: "From: Shan Shah",
     desc: "@devin what are the name servers for Digital Ocean?",
     time: "11:40 PM",
     icon: "img/task_list/discord.png",
-    href: 'http://www.google.com'
+    href: "http://www.google.com"
   }, {
     title: "Github | Honeydu",
     status: "Repo: Mobile      Commit: 6weFwer",
     desc: "@devin should we change this method to be async?",
     time: "1:50 AM",
     icon: "img/task_list/github.png",
-    href: 'http://www.github.com'
+    href: "http://www.github.com"
   }];
   const task_type = {
     title: "Jira | DELT 181",
@@ -287,7 +289,7 @@ function Control() {
     desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
     time: "12:40 PM",
     icon: "img/task_list/jira.png",
-    href: 'http:\\www.google.com'
+    href: "http:\\www.google.com"
   };
   const {
     tabs,
@@ -316,6 +318,23 @@ function Control() {
     title
   } = tabs[activeID] || {};
   const [current_Url, setCurrent_Url] = (0, _react.useState)(site_type);
+  const {
+    close,
+    open,
+    isSupported
+  } = (0, _useEyeDropper.default)();
+  const [color, setColor] = (0, _react.useState)("#666666");
+  const [error, setError] = (0, _react.useState)();
+
+  const pickColor = () => {
+    open().then(color => {
+      setColor(color.sRGBHex);
+    }).catch(e => {
+      // Ensures component is still mounted
+      // before calling setState
+      if (!e.canceled) setError(e);
+    });
+  };
 
   const onUrlChange = e => {
     // alert('url changed!');
@@ -348,12 +367,11 @@ function Control() {
     // action.sendReload();
     // action.sendChangeURL(new_TabUrl);
     // action.sendEnterURL(new_TabUrl);
-  };
+  }; // const close = (e, id) => {
+  //   e.stopPropagation();
+  //   action.sendCloseTab(id);
+  // };
 
-  const close = (e, id) => {
-    e.stopPropagation();
-    action.sendCloseTab(id);
-  };
 
   const switchTab = value => {// action.sendSwitchTab(sites[id].id);
     // console.log(value);
@@ -421,6 +439,12 @@ function Control() {
     action.sendCloseTab();
   };
 
+  const clipboardLink = url => {
+    navigator.clipboard.writeText(url); // alert("Clipboard correctly");
+
+    action.sendLink(url);
+  };
+
   const quit = () => {
     console.log("quit------------");
     action.quit();
@@ -478,7 +502,7 @@ function Control() {
     className: "bar-lock"
   }), _react.default.createElement("input", {
     className: "bar-address",
-    value: url || '',
+    value: url || "",
     onChange: onUrlChange,
     onKeyDown: onPressEnter
   }), _react.default.createElement("div", {
@@ -496,22 +520,34 @@ function Control() {
   }), _react.default.createElement("div", {
     className: "ctrl-bar-tools"
   }, _react.default.createElement("div", {
-    className: "ctrl-bar-tool-item tool-spotify"
+    className: "ctrl-bar-tool-item tool-spotify",
+    onClick: action.sendSpotify
   }), _react.default.createElement("div", {
-    className: "ctrl-bar-tool-item tool-metro-fire"
+    className: "ctrl-bar-tool-item tool-metro-fire",
+    onClick: action.sendDeleteAllCookie
   }), _react.default.createElement("div", {
-    className: "ctrl-bar-tool-item tool-email"
+    className: "ctrl-bar-tool-item tool-email",
+    onClick: action.sendEmail
   }), _react.default.createElement("div", {
-    className: "ctrl-bar-tool-item tool-phone"
+    className: "ctrl-bar-tool-item tool-phone",
+    onClick: action.sendPhone
   }), _react.default.createElement("div", {
-    className: "ctrl-bar-tool-item tool-camera"
-  }), _react.default.createElement("div", {
-    className: "ctrl-bar-tool-item tool-colorize"
-  }), _react.default.createElement("div", {
+    className: "ctrl-bar-tool-item tool-camera",
+    onClick: () => action.sendScreenshot(url)
+  }), isSupported() ? _react.default.createElement("div", {
+    className: "ctrl-bar-tool-item fa fa-eyedropper",
+    style: {
+      color: color,
+      marginLeft: "7px",
+      cursor: "pointer"
+    },
+    onClick: pickColor
+  }) : _react.default.createElement("span", null, "EyeDropper API not supported in this browser"), _react.default.createElement("div", {
     className: "ctrl-bar-tool-item tool-code",
     onClick: action.sendOpenDevTool
   }), _react.default.createElement("div", {
-    className: "ctrl-bar-tool-item tool-link"
+    className: "ctrl-bar-tool-item tool-link",
+    onClick: () => clipboardLink(url)
   })), _react.default.createElement("div", {
     className: "ctrl-bar-unknown1 normal-clickable"
   }, _react.default.createElement("img", {
@@ -530,7 +566,7 @@ function Control() {
     } = leftTabs[id] || {};
     return _react.default.createElement("div", {
       key: id,
-      className: (0, _classnames.default)('tab-item', {
+      className: (0, _classnames.default)("tab-item", {
         active: id === activeLeftID
       }),
       onClick: () => setLeftID(id)
@@ -564,7 +600,7 @@ function Control() {
   }))), _react.default.createElement("div", {
     className: "st task-bar"
   }, _react.default.createElement("div", {
-    className: (0, _classnames.default)('site-list', {
+    className: (0, _classnames.default)("site-list", {
       none: tempID !== 0
     })
   }, _react.default.createElement("div", {
@@ -574,7 +610,7 @@ function Control() {
     activeID: activeSiteID,
     setActiveSiteID: setActiveSiteID
   })), _react.default.createElement("div", {
-    className: (0, _classnames.default)('task-list', {
+    className: (0, _classnames.default)("task-list", {
       none: tempID !== 1
     })
   }, _react.default.createElement("div", {
@@ -591,4 +627,4 @@ function Control() {
 } // eslint-disable-next-line no-undef
 
 
-_reactDom.default.render(_react.default.createElement(Control, null), document.getElementById('app'));
+_reactDom.default.render(_react.default.createElement(Control, null), document.getElementById("app"));

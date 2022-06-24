@@ -1,6 +1,17 @@
-const { BrowserWindow, BrowserView, ipcMain } = require('electron');
-const EventEmitter = require('events');
-const log = require('electron-log');
+const {
+  app,
+  BrowserWindow,
+  BrowserView,
+  ipcMain,
+  session,
+  dialog,
+  Notification,
+} = require("electron");
+const EventEmitter = require("events");
+const log = require("electron-log");
+const fs = require("fs");
+const { url } = require("inspector");
+const puppeteer = require("puppeteer");
 
 log.transports.file.level = false;
 log.transports.console.level = false;
@@ -50,7 +61,7 @@ log.transports.console.level = false;
  * @param {boolean} [options.debug] - toggle debug
  */
 class BrowserLikeWindow extends EventEmitter {
-  constructor(options) {
+  constructor(options, callback) {
     super();
 
     this.options = options;
@@ -60,7 +71,7 @@ class BrowserLikeWindow extends EventEmitter {
       winOptions = {},
       controlPanel,
       workspacePanel,
-      controlReferences
+      controlReferences,
     } = options;
 
     this.win = new BrowserWindow({
@@ -69,7 +80,7 @@ class BrowserLikeWindow extends EventEmitter {
       height,
       transparent: true,
       frame: false,
-      darkTheme : true
+      darkTheme: true,
     });
     this.win.setMenu(null);
     this.win.maximize();
@@ -90,17 +101,17 @@ class BrowserLikeWindow extends EventEmitter {
     const contentHeight = contentWinBounds.height;
     const nBorder = 10;
     this.workspaceWin = new BrowserWindow({
-      x : parentBounds.x + parentBounds.wSight + nBorder,
-      y : parentBounds.y + parentBounds.hSight + nBorder,
-      width : Math.round(contentWidth * 0.8203) - nBorder*2,
-      height : contentHeight - parentBounds.hSight - nBorder,
+      x: parentBounds.x + parentBounds.wSight + nBorder,
+      y: parentBounds.y + parentBounds.hSight + nBorder,
+      width: Math.round(contentWidth * 0.8203) - nBorder * 2,
+      height: contentHeight - parentBounds.hSight - nBorder,
       transparent: true,
       // alwaysOnTop : true,
       frame: false,
       // modal : true,
       show: false,
       debug: true,
-      parent: this.win
+      parent: this.win,
     });
 
     this.workspaceView = new BrowserView({
@@ -109,23 +120,23 @@ class BrowserLikeWindow extends EventEmitter {
         nodeIntegration: true,
         // Allow loadURL with file path in dev environment
         webSecurity: false,
-        darkTheme : true
-      }
+        darkTheme: true,
+      },
     });
 
     // BrowserView should add to window before setup
     this.workspaceWin.setBrowserView(this.workspaceView);
     const contentBounds = this.workspaceWin.getContentBounds();
     this.workspaceView.setBounds({
-      x:0,
-      y:0,
-      width:contentBounds.width,
-      height:contentBounds.height
+      x: 0,
+      y: 0,
+      width: contentBounds.width,
+      height: contentBounds.height,
     });
     // workspaceView.setAutoResize({ width: true });
     this.workspaceView.webContents.loadURL(workspacePanel);
 
-    this.workspaceWin.setBackgroundColor('#aa333333');
+    this.workspaceWin.setBackgroundColor("#aa333333");
     this.workspaceWin.setMenu(null);
     this.workspaceWin.setResizable(false);
     this.openWorkspace = false;
@@ -136,8 +147,8 @@ class BrowserLikeWindow extends EventEmitter {
         nodeIntegration: true,
         // Allow loadURL with file path in dev environment
         webSecurity: false,
-        ...controlReferences
-      }
+        ...controlReferences,
+      },
     });
 
     // BrowserView should add to window before setup
@@ -146,66 +157,162 @@ class BrowserLikeWindow extends EventEmitter {
     this.controlView.setAutoResize({ width: true });
     this.controlView.webContents.loadURL(controlPanel);
 
-    const webContentsAct = actionName => {
+    const webContentsAct = (actionName) => {
       const webContents = this.currentWebContents;
       const action = webContents && webContents[actionName];
-      if (typeof action === 'function') {
-        if (actionName === 'reload' && webContents.getURL() === '') return;
+      if (typeof action === "function") {
+        if (actionName === "reload" && webContents.getURL() === "") return;
         action.call(webContents);
         log.debug(
-          `do webContents action ${actionName} for ${this.currentViewId}:${webContents &&
-            webContents.getTitle()}`
+          `do webContents action ${actionName} for ${this.currentViewId}:${
+            webContents && webContents.getTitle()
+          }`
         );
       } else {
-        log.error('Invalid webContents action ', actionName);
+        log.error("Invalid webContents action ", actionName);
       }
     };
 
     const channels = Object.entries({
-      'control-ready': e => {
+      "control-ready": (e) => {
         this.ipc = e;
 
-        this.newTab(this.options.startPage || '');
+        this.newTab(this.options.startPage || "");
         /**
          * control-ready event.
          *
          * @event BrowserLikeWindow#control-ready
          * @type {IpcMainEvent}
          */
-        this.emit('control-ready', e);
+        this.emit("control-ready", e);
       },
-      'url-change': (e, url) => {
+      "url-change": (e, url) => {
         this.setTabConfig(this.currentViewId, { url });
-      //  console.log('ddd');
-      // log.debug('ddd??');
+        //  console.log('ddd');
+        // log.debug('ddd??');
       },
-      'url-enter': (e, url) => {
+      "url-enter": (e, url) => {
         this.loadURL(url);
         // console.log(url);
       },
-      'open-devtools':(e) => {
-        console.log('ddd'),
-        this.openDevTools({ mode: 'right' });
+      "delete-all-cookie": (e) => {
+        session.defaultSession
+          .clearStorageData({ storages: ["cookies"] })
+          .then(() => {
+            console.log("All cookies cleared");
+          })
+          .catch((error) => {
+            console.error("Failed to clear cookies: ", error);
+          });
+        session.defaultSession
+          .clearCache()
+          .then(() => {
+            console.log("All cache cleared");
+          })
+          .catch((error) => {
+            console.error("Failed to clear cache: ", error);
+          });
       },
+
+      "link-spotify": (e) => {
+        let { webContents } = this.currentView;
+        const spotifyURL = "https://www.spotify.com/";
+        webContents.loadURL(spotifyURL);
+        console.log(spotifyURL);
+      },
+
+      "link-gmail": (e) => {
+        let { webContents } = this.currentView;
+        const mailURL = "https://mail.google.com/";
+        webContents.loadURL(mailURL);
+        console.log(mailURL);
+      },
+
+      "simulate-phone": (e) => {
+        console.log("phone");
+      },
+
+      "pick-colorize": (e) => {
+        console.log("colorize");
+      },
+
+      "link-bitly": (e, url) => {
+        const NOTIFICATION_BODY = "Clipboard Message";
+        const NOTIFICATION_TITLE = `Clipboard  correctly done!\n url:${url}`;
+        new Notification({
+          title: NOTIFICATION_TITLE,
+          body: NOTIFICATION_BODY,
+        }).show();
+        console.log("bitly");
+      },
+
+      "open-devtools": (e) => {
+        this.openDevTools({ mode: "right" });
+      },
+      "screen-shot": (e, url) => {
+        let { webContents } = this.currentView;
+        dialog
+          .showSaveDialog({
+            properties: ["openFile", "openDirectory"],
+            title: "Save to ScreenShot Files…",
+            defaultPath: "screenShot.png",
+            filters: [
+              {
+                name: "All Files",
+                extensions: ["*"],
+              },
+              { name: "png Files", extensions: ["png"] },
+              { name: "jpg Files", extensions: ["jpg"] },
+            ],
+          })
+          .then(function (response) {
+            if (!response.canceled) {
+              // handle fully qualified file name
+              const savePath = response.filePath;
+              // const size = electron.screen.getPrimaryDisplay().workAreaSize;
+              console.log(":::Save path", savePath);
+              console.log(":::Screen Size", contentWidth, contentHeight);
+              puppeteer
+                .launch({
+                  defaultViewport: {
+                    width: contentBounds.width,
+                    height: contentBounds.height,
+                  },
+                })
+                .then(async (browser) => {
+                  const page = await browser.newPage();
+                  await page.goto(savePath);
+                  await page.screenshot({
+                    path: savePath,
+                  });
+                  await browser.close();
+                });
+            } else {
+              console.log("no file selected");
+            }
+          });
+      },
+
       act: (e, actName) => webContentsAct(actName),
-      'new-tab': (e, url, references) => {
-        log.debug('new-tab with url', url);
+      "new-tab": (e, url, references) => {
+        log.debug("new-tab with url", url);
         this.newTab(url, undefined, references);
       },
-      'switch-tab': (e, id) => {
+      "switch-tab": (e, id) => {
         this.switchTab(id);
       },
-      'close-tab': (e, id) => {
-        log.debug('close tab ', { id, currentViewId: this.currentViewId });
+      "close-tab": (e, id) => {
+        log.debug("close tab ", { id, currentViewId: this.currentViewId });
         if (id === this.currentViewId) {
           const removeIndex = this.tabs.indexOf(id);
-          const nextIndex = removeIndex === this.tabs.length - 1 ? 0 : removeIndex + 1;
+          const nextIndex =
+            removeIndex === this.tabs.length - 1 ? 0 : removeIndex + 1;
           this.setCurrentView(this.tabs[nextIndex]);
         }
-        this.tabs = this.tabs.filter(v => v !== id);
+        this.tabs = this.tabs.filter((v) => v !== id);
         this.tabConfigs = {
           ...this.tabConfigs,
-          [id]: undefined
+          [id]: undefined,
         };
         this.destroyView(id);
 
@@ -213,12 +320,12 @@ class BrowserLikeWindow extends EventEmitter {
           this.newTab();
         }
       },
-      'show-workspace': (e, val) => {
+      "show-workspace": (e, val) => {
         this.showWorkspace(val);
       },
-      'hide-workspace': (e, val) => {
+      "hide-workspace": (e, val) => {
         this.hideWorkspace(val);
-      }
+      },
     });
 
     channels
@@ -230,7 +337,7 @@ class BrowserLikeWindow extends EventEmitter {
             log.debug(`Trigger ${name} from ${e.sender.id}`);
             listener(e, ...args);
           }
-        }
+        },
       ])
       .forEach(([name, listener]) => ipcMain.on(name, listener));
 
@@ -239,25 +346,27 @@ class BrowserLikeWindow extends EventEmitter {
      *
      * @event BrowserLikeWindow#closed
      */
-    this.win.on('closed', () => {
+    this.win.on("closed", () => {
       // Remember to clear all ipcMain events as ipcMain bind
       // on every new browser instance
-      channels.forEach(([name, listener]) => ipcMain.removeListener(name, listener));
+      channels.forEach(([name, listener]) =>
+        ipcMain.removeListener(name, listener)
+      );
 
       // Prevent BrowserView memory leak on close
-      this.tabs.forEach(id => this.destroyView(id));
+      this.tabs.forEach((id) => this.destroyView(id));
       if (this.controlView) {
         this.controlView.webContents.destroy();
         this.controlView = null;
-        log.debug('Control view destroyed');
+        log.debug("Control view destroyed");
       }
-      this.emit('closed');
+      this.emit("closed");
     });
 
     if (this.options.debug) {
-      this.controlView.webContents.openDevTools({ mode: 'detach' });
+      //   this.controlView.webContents.openDevTools({ mode: "detach" });
       // this.controlView.webContents.openDevTools();
-      log.transports.console.level = 'debug';
+      log.transports.console.level = "debug";
     }
   }
 
@@ -274,7 +383,7 @@ class BrowserLikeWindow extends EventEmitter {
       width: contentBounds.width,
       height: contentBounds.height,
       hSight: Math.round(contentBounds.height * 0.052),
-      wSight: Math.round(contentBounds.width * 0.1797)
+      wSight: Math.round(contentBounds.width * 0.1797),
     };
   }
 
@@ -292,7 +401,7 @@ class BrowserLikeWindow extends EventEmitter {
       this.currentView.setBounds({
         x: controlBounds.x + controlBounds.wSight + nBorder,
         y: controlBounds.y + controlBounds.hSight + nBorder,
-        width: Math.round(contentWidth * 0.8203) - nBorder*2,
+        width: Math.round(contentWidth * 0.8203) - nBorder * 2,
         height: contentHeight - controlBounds.hSight - nBorder,
       });
     }
@@ -317,7 +426,7 @@ class BrowserLikeWindow extends EventEmitter {
     this.defCurrentViewId = id;
     this.setContentBounds();
     if (this.ipc) {
-      this.ipc.reply('active-update', id);
+      this.ipc.reply("active-update", id);
     }
   }
 
@@ -328,9 +437,9 @@ class BrowserLikeWindow extends EventEmitter {
   set tabConfigs(v) {
     this.defTabConfigs = v;
     if (this.ipc) {
-      this.ipc.reply('tabs-update', {
+      this.ipc.reply("tabs-update", {
         confs: v,
-        tabs: this.tabs
+        tabs: this.tabs,
       });
     }
   }
@@ -344,8 +453,8 @@ class BrowserLikeWindow extends EventEmitter {
         ...tab,
         canGoBack: webContents && webContents.canGoBack(),
         canGoForward: webContents && webContents.canGoForward(),
-        ...kv
-      }
+        ...kv,
+      },
     };
     return this.tabConfigs;
   }
@@ -357,26 +466,26 @@ class BrowserLikeWindow extends EventEmitter {
     const { id, webContents } = currentView;
 
     // Prevent addEventListeners on same webContents when enter urls in same tab
-    const MARKS = '__IS_INITIALIZED__';
+    const MARKS = "__IS_INITIALIZED__";
     if (webContents[MARKS]) {
       webContents.loadURL(url);
       return;
     }
 
     const onNewWindow = (e, newUrl, frameName, disposition, winOptions) => {
-      log.debug('on new-window', { disposition, newUrl, frameName });
+      log.debug("on new-window", { disposition, newUrl, frameName });
 
       if (!new URL(newUrl).host) {
         // Handle newUrl = 'about:blank' in some cases
-        log.debug('Invalid url open with default window');
+        log.debug("Invalid url open with default window");
         return;
       }
 
       e.preventDefault();
 
-      if (disposition === 'new-window') {
+      if (disposition === "new-window") {
         e.newGuest = new BrowserWindow(winOptions);
-      } else if (disposition === 'foreground-tab') {
+      } else if (disposition === "foreground-tab") {
         this.newTab(newUrl, id);
         // `newGuest` must be setted to prevent freeze trigger tab in case.
         // The window will be destroyed automatically on trigger tab closed.
@@ -386,20 +495,20 @@ class BrowserLikeWindow extends EventEmitter {
       }
     };
 
-    webContents.on('new-window', this.options.onNewWindow || onNewWindow);
+    webContents.on("new-window", this.options.onNewWindow || onNewWindow);
 
     // Keep event in order
     webContents
-      .on('did-start-loading', () => {
-        log.debug('did-start-loading > set loading');
+      .on("did-start-loading", () => {
+        log.debug("did-start-loading > set loading");
         this.setTabConfig(id, { isLoading: true });
       })
-      .on('did-start-navigation', (e, href, isInPlace, isMainFrame) => {
+      .on("did-start-navigation", (e, href, isInPlace, isMainFrame) => {
         if (isMainFrame) {
-          log.debug('did-start-navigation > set url address', {
+          log.debug("did-start-navigation > set url address", {
             href,
             isInPlace,
-            isMainFrame
+            isMainFrame,
           });
           this.setTabConfig(id, { url: href, href });
           /**
@@ -409,27 +518,27 @@ class BrowserLikeWindow extends EventEmitter {
            * @return {BrowserView} view - current browser view
            * @return {string} href - updated url
            */
-          this.emit('url-updated', { view: currentView, href });
+          this.emit("url-updated", { view: currentView, href });
         }
       })
-      .on('will-redirect', (e, href) => {
-        log.debug('will-redirect > update url address', { href });
+      .on("will-redirect", (e, href) => {
+        log.debug("will-redirect > update url address", { href });
         this.setTabConfig(id, { url: href, href });
-        this.emit('url-updated', { view: currentView, href });
+        this.emit("url-updated", { view: currentView, href });
       })
-      .on('page-title-updated', (e, title) => {
-        log.debug('page-title-updated', title);
+      .on("page-title-updated", (e, title) => {
+        log.debug("page-title-updated", title);
         this.setTabConfig(id, { title });
       })
-      .on('page-favicon-updated', (e, favicons) => {
-        log.debug('page-favicon-updated', favicons);
+      .on("page-favicon-updated", (e, favicons) => {
+        log.debug("page-favicon-updated", favicons);
         this.setTabConfig(id, { favicon: favicons[0] });
       })
-      .on('did-stop-loading', () => {
-        log.debug('did-stop-loading', { title: webContents.getTitle() });
+      .on("did-stop-loading", () => {
+        log.debug("did-stop-loading", { title: webContents.getTitle() });
         this.setTabConfig(id, { isLoading: false });
       })
-      .on('dom-ready', () => {
+      .on("dom-ready", () => {
         webContents.focus();
       });
 
@@ -439,15 +548,15 @@ class BrowserLikeWindow extends EventEmitter {
     this.setContentBounds();
 
     if (this.options.debug) {
-      webContents.openDevTools({ mode: 'detach' });
+      //   webContents.openDevTools({ mode: "detach" });
     }
   }
 
   openDevTools() {
-    const {webContents} = this.currentView;
-    webContents.openDevTools({ mode: 'right' });
+    const { webContents } = this.currentView;
+    webContents.openDevTools({ mode: "right" });
   }
-  
+
   setCurrentView(viewId) {
     if (!viewId) return;
 
@@ -472,8 +581,8 @@ class BrowserLikeWindow extends EventEmitter {
         // Set sandbox to support window.opener
         // See: https://github.com/electron/electron/issues/1865#issuecomment-249989894
         sandbox: true,
-        ...(references || this.options.viewReferences)
-      }
+        ...(references || this.options.viewReferences),
+      },
     });
 
     view.id = view.webContents.id;
@@ -492,7 +601,7 @@ class BrowserLikeWindow extends EventEmitter {
     view.setAutoResize({ width: true, height: true });
     this.loadURL(url || this.options.blankPage);
     this.setTabConfig(view.id, {
-      title: this.options.blankTitle || 'about:blank'
+      title: this.options.blankTitle || "about:blank",
     });
     /**
      * new-tab event.
@@ -502,7 +611,7 @@ class BrowserLikeWindow extends EventEmitter {
      * @return {string} [source.openedURL] - opened with url
      * @return {BrowserView} source.lastView - previous active view
      */
-    this.emit('new-tab', view, { openedURL: url, lastView });
+    this.emit("new-tab", view, { openedURL: url, lastView });
     return view;
   }
 
@@ -512,9 +621,9 @@ class BrowserLikeWindow extends EventEmitter {
    */
   switchTab(viewId) {
     // alert(viewId);
-    log.debug('switch to tab', viewId);
+    log.debug("switch to tab", viewId);
     this.setCurrentView(viewId);
-    
+
     this.currentView.webContents.focus();
   }
 
@@ -558,8 +667,8 @@ class BrowserLikeWindow extends EventEmitter {
   // setContentBounds() {
   //   const controlBounds = this.getControlBounds();
   //   const contentBounds = this.win.getContentBounds();
-    // const contentWidth = contentBounds.width;
-    // const contentHeight = contentBounds.height;
+  // const contentWidth = contentBounds.width;
+  // const contentHeight = contentBounds.height;
   //   if (this.currentView) {
   //     const nBorder = 10;
   //     this.currentView.setBounds({
@@ -572,13 +681,13 @@ class BrowserLikeWindow extends EventEmitter {
   // }
 
   showWorkspace(val) {
-    if(this.openWorkspace){
+    if (this.openWorkspace) {
       this.hideWorkspace("from show");
       return;
     }
     log.debug(`${val} - showWorkspace`);
     this.workspaceWin.show();
-    this.controlView.webContents.openDevTools({ mode: 'detach' });
+    this.controlView.webContents.openDevTools({ mode: "detach" });
     this.openWorkspace = true;
   }
 

@@ -10,24 +10,69 @@ var _useConnect = _interopRequireDefault(require("../../useConnect"));
 
 var action = _interopRequireWildcard(require("../../control"));
 
+var _useEffectReducer = require("use-effect-reducer");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
 function Control() {
-  const hideWorkspace = val => {
-    action.hideWorkspace(val);
+  const showWorkspace = val => {
+    action.showWorkspace(val);
   };
+
+  const {
+    tabs,
+    tabIDs,
+    activeID,
+    tasks,
+    addLeftTabs,
+    leftTabs,
+    setLeftTabs,
+    changeTask,
+    countReducer
+  } = (0, _useConnect.default)();
+  const [state, dispatch] = (0, _useEffectReducer.useEffectReducer)(countReducer, {
+    count: 0
+  });
+
+  const addTask = () => {
+    // alert('dddd');
+    let task_type = {
+      title: "Discord | Honeydu",
+      status: "From: Shan Shah",
+      desc: "@devin what are the name servers for Digital Ocean?",
+      time: "11:40 PM",
+      icon: "img/task_list/discord.png",
+      href: 'http://www.google.com'
+    }; // alert(activeID);
+    // alert(task_type.title);
+    // action.sendAddTask(task_type);
+
+    changeTask(task_type); // alert(JSON.stringify(leftTabs));
+    // action.sendReload();
+    // action.showWorkspace('add-task');
+    // alert('change task!!');
+
+    action.sendReload(); // alert('dddd');
+  }; // useEffect(()=> {
+  //   tasks = useConnect().tasks;
+  //   alert(JSON.stringify(tasks));
+  // });
+
 
   return _react.default.createElement("div", {
     className: "container",
-    onClick: () => hideWorkspace("hide-workspace")
+    onClick: () => {
+      dispatch('INC');
+    }
   }, _react.default.createElement("div", {
     className: "add-workspace"
   }, _react.default.createElement("div", {
     className: "add-name"
   }, _react.default.createElement("div", {
-    className: "add-plus"
+    className: "add-plus",
+    onClick: () => addTask()
   }, _react.default.createElement("img", {
     className: "center-img",
     src: "img/workspace/plus.png"
@@ -37,7 +82,7 @@ function Control() {
     className: "input-title",
     placeholder: "Name your workspace"
   }))), _react.default.createElement("div", {
-    className: "add-setting"
+    className: "add-setting "
   }, _react.default.createElement("label", {
     class: "switch"
   }, _react.default.createElement("input", {

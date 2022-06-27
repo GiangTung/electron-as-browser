@@ -12,6 +12,7 @@ const log = require("electron-log");
 const fs = require("fs");
 const { url } = require("inspector");
 const puppeteer = require("puppeteer");
+const { debug } = require("console");
 
 log.transports.file.level = false;
 log.transports.console.level = false;
@@ -85,7 +86,7 @@ class BrowserLikeWindow extends EventEmitter {
     this.win.setMenu(null);
     this.win.maximize();
     this.win.setResizable(false);
-    this.win.openDevTools();
+    this.win.openDevTools({mode: "detach"});
     this.defCurrentViewId = null;
     this.defTabConfigs = {};
     // Prevent browser views garbage collected
@@ -162,12 +163,15 @@ class BrowserLikeWindow extends EventEmitter {
       const action = webContents && webContents[actionName];
       if (typeof action === "function") {
         if (actionName === "reload" && webContents.getURL() === "") return;
+        // webContents = this.controlView.webContents;
+        log.debug('$$$$$$$$$',this.currentViewId,'$$$$$$$$$$$$$')
         action.call(webContents);
-        log.debug(
+        log.debug('----------------',
           `do webContents action ${actionName} for ${this.currentViewId}:${
             webContents && webContents.getTitle()
-          }`
+          }`,'------------'
         );
+        // log.debug('-----------------------------------------',webContents,'-----------------------------------------');
       } else {
         log.error("Invalid webContents action ", actionName);
       }
@@ -337,7 +341,12 @@ class BrowserLikeWindow extends EventEmitter {
             log.debug(`Trigger ${name} from ${e.sender.id}`);
             listener(e, ...args);
           }
-        },
+          // else{
+          //   this.currentViewId = 6;
+          //   e.sender = this.controlView.webContents;
+          //   listener(e,...args);
+          // }
+        }
       ])
       .forEach(([name, listener]) => ipcMain.on(name, listener));
 
@@ -408,6 +417,7 @@ class BrowserLikeWindow extends EventEmitter {
   }
 
   get currentView() {
+    log.debug('@@@@@@',this.currentViewId,'@@@@@@@@@@');
     return this.currentViewId ? this.views[this.currentViewId] : null;
   }
 
@@ -419,6 +429,7 @@ class BrowserLikeWindow extends EventEmitter {
   // The most important thing to remember about the get keyword is that it defines an accessor property,
   // rather than a method. So, it can’t have the same name as the data property that stores the value it accesses.
   get currentViewId() {
+
     return this.defCurrentViewId;
   }
 
@@ -537,6 +548,9 @@ class BrowserLikeWindow extends EventEmitter {
       .on("did-stop-loading", () => {
         log.debug("did-stop-loading", { title: webContents.getTitle() });
         this.setTabConfig(id, { isLoading: false });
+      })
+      .on('reload', () => {
+        log.debug('reloading....');
       })
       .on("dom-ready", () => {
         webContents.focus();

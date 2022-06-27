@@ -12,6 +12,8 @@ var action = _interopRequireWildcard(require("../../control"));
 
 var _useEyeDropper = _interopRequireDefault(require("use-eye-dropper"));
 
+var _useEffectReducer = require("use-effect-reducer");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
@@ -135,10 +137,10 @@ function SiteList(props) {
   return _react.default.createElement("ul", {
     className: "site-ul"
   }, list.map((item, id) => _react.default.createElement(SiteItem, {
-    key: id,
-    icon: item.icon,
-    value: item.value,
-    href: item.href,
+    key: item.tabId,
+    icon: item.tab.favicon,
+    value: item.tab.title,
+    href: item.tab.url,
     id: id,
     activeID: activeID,
     setActiveSiteID: setActiveSiteID
@@ -220,26 +222,73 @@ let show_Site = undefined;
 
 function Control() {
   const sites_initial = [{
-    value: "Gmail | devin@honeydu.io",
-    icon: "img/site_list/g-Mail.png",
-    href: "http://www.mail.google.com"
+    tab: {
+      canGoBack: false,
+      canGoForward: false,
+      favicon: "img/site_list/g-mail.png",
+      href: "https://mail.google.com",
+      isLoading: false,
+      title: "Gmail | devin@honeydu.io",
+      url: "https://mail.google.com/"
+    },
+    tabId: 7
   }, {
-    value: "Github | Honeydu | Mobile",
-    icon: "img/site_list/github.png",
-    href: "http://www.github.com"
+    tab: {
+      canGoBack: false,
+      canGoForward: false,
+      favicon: "img/site_list/github.png",
+      href: "https://github.com/",
+      isLoading: false,
+      title: "Github | Honeydu | Mobile",
+      url: "https://github.com/"
+    },
+    tabId: 8
   }, {
-    value: "brew install chrome - Google",
-    icon: "img/site_list/google.png",
-    href: "http://www.google.com"
+    tab: {
+      canGoBack: false,
+      canGoForward: false,
+      favicon: "https://www.google.com/favicon.ico",
+      href: "https://www.google.com/",
+      isLoading: false,
+      title: "brew install chrome - Google",
+      url: "https://www.google.com/"
+    },
+    tabId: 9
   }, {
-    value: "Youtube",
-    icon: "img/site_list/youtube.png",
-    href: "http:\\youtube.com"
+    tab: {
+      canGoBack: false,
+      canGoForward: false,
+      favicon: "img/site_list/youtube.png",
+      href: "https://youtube.com/",
+      isLoading: false,
+      title: "Youtube",
+      url: "https://youtube.com/"
+    },
+    tabId: 10
   }, {
-    value: "Implement <hr> into app...",
-    icon: "img/site_list/google.png",
-    href: "http://www.google.com"
+    tab: {
+      canGoBack: false,
+      canGoForward: false,
+      favicon: "https://www.google.com/favicon.ico",
+      href: "https://www.google.com/",
+      isLoading: false,
+      title: "Implement|into app...",
+      url: "https://www.google.com/"
+    },
+    tabId: 11
   }];
+  const site_type = {
+    tab: {
+      canGoBack: false,
+      canGoForward: false,
+      favicon: "https://www.google.com/favicon.ico",
+      href: "https://www.google.com/",
+      isLoading: false,
+      title: "Google",
+      url: "https://www.google.com/"
+    },
+    tabId: 7
+  };
   const tasks_initial = [{
     title: "Moana Wells",
     status: "Guitar jams w/ Mark at McCabe’s",
@@ -294,19 +343,23 @@ function Control() {
   const {
     tabs,
     tabIDs,
-    activeID
+    tasks,
+    activeID,
+    addLeftTabs,
+    leftTabs,
+    setLeftTabs,
+    getTasks,
+    countReducer
   } = (0, _useConnect.default)();
   const [activeSiteID, setActiveSiteID] = (0, _react.useState)(0);
   const [activeTaskID, setActiveTaskID] = (0, _react.useState)(0);
   const [activeLeftID, setActiveLeftID] = (0, _react.useState)(0);
   const [tempID, setTempID] = (0, _react.useState)(0);
   const [sites, setSites] = (0, _react.useState)(sites_initial);
-  const [tasks, setTasks] = (0, _react.useState)(tasks_initial);
-  const site_type = {
-    value: "http://www.google.com",
-    icon: "http://www.google\favicon.ico",
-    href: "http://www.google.com"
-  };
+  const [state, dispatch] = (0, _useEffectReducer.useEffectReducer)(countReducer, {
+    tasks: (0, _useConnect.default)().tasks
+  }); // const [tasks, setTasks] = useState(tasks_initial);
+
   console.log(tabs);
   const {
     url,
@@ -362,11 +415,19 @@ function Control() {
     action.sendEnterURL(href);
   };
 
-  const changeTab = id => {// url = new_TabUrl;
+  const changetab = new_url => {
+    // alert(new_url);
+    // url = new_TabUrl;
     // alert(url);
     // action.sendReload();
     // action.sendChangeURL(new_TabUrl);
     // action.sendEnterURL(new_TabUrl);
+    if (!/^.*?:\/\//.test(new_url)) {
+      new_url = `http://${new_url}`;
+    }
+
+    action.sendChangeURL(new_url);
+    action.sendEnterURL(new_url);
   }; // const close = (e, id) => {
   //   e.stopPropagation();
   //   action.sendCloseTab(id);
@@ -399,19 +460,35 @@ function Control() {
     // console.log(sites);
   };
 
-  const leftTabs = [{
-    icon: "fruit",
-    func: "none"
-  }, {
-    icon: "brain",
-    func: "none"
-  }, {
-    icon: "face",
-    func: "none"
-  }, {
-    icon: "star",
-    func: "none"
-  }];
+  const addLeftTab = () => {
+    // alert('ddd');
+    let new_leftTab = {
+      icon: "brain",
+      func: "aaaa"
+    }; // setleftTabs(new_leftTab);
+
+    addLeftTabs(new_leftTab);
+    console.log('------------------------------');
+    console.log(leftTabs);
+    console.log('------------------------------'); // console.log(leftTabs);
+
+    console.log('------------------------------');
+    console.log(leftTabs); // alert('ddd');
+
+    action.sendReload(); // alert(JSON.stringify(useConnect().tasks));
+  }; // const[seconds, setSeconds] = useState(300);
+  //Now as soon as the time in given two states is zero, remove the interval.
+  // alert('sdfsf');
+
+
+  (0, _react.useEffect)(() => {
+    let interval = setInterval(() => {
+      // setSeconds(seconds => seconds -1);
+      dispatch('INC');
+    }, 500); // clearInterval(interval);
+  }, []); // function reset() {
+  //   setSeconds(300); 
+  // } 
 
   const setLeftID = id => {
     console.log("setLeftID", id);
@@ -472,13 +549,14 @@ function Control() {
   }))), _react.default.createElement("div", {
     className: "ctrl-bar"
   }, _react.default.createElement("div", {
-    className: "ctrl-bar-unknown normal-clickable"
+    className: "ctrl-bar-unknown normal-clickable",
+    onClick: () => dispatch('INC')
   }, _react.default.createElement("img", {
     className: "center-img",
     src: "img/unknown.png"
   })), _react.default.createElement("div", {
     className: "ctrl-bar-checker",
-    onClick: () => addHoneydu(title, url, favicon)
+    onClick: () => action.showWorkspace('ss')
   }), _react.default.createElement("div", {
     className: "ctrl-bar-plus normal-clickable",
     onClick: () => createNewTab()
@@ -576,7 +654,9 @@ function Control() {
     }));
   })), _react.default.createElement("div", {
     className: "tab-plus normal-clickable",
-    onClick: () => showWorkspace("workspace")
+    onClick: () => {
+      addLeftTab(), action.sendReload();
+    }
   }, _react.default.createElement("img", {
     className: "center-img",
     src: "img/Icon-feather-plus.png"
@@ -585,15 +665,17 @@ function Control() {
   }, _react.default.createElement("div", {
     className: "pin-tools"
   }, _react.default.createElement("div", {
-    className: "pin-tool-item tool-bookmark"
+    className: "pin-tool-item tool-check",
+    onClick: () => setLeftID(1)
   }), _react.default.createElement("div", {
-    className: "pin-tool-item tool-check"
+    className: "pin-tool-item tool-chatbubble",
+    onClick: () => changetab('chat.google.com')
   }), _react.default.createElement("div", {
-    className: "pin-tool-item tool-chatbubble"
+    className: "pin-tool-item tool-pmail",
+    onClick: () => changetab('mail.google.com')
   }), _react.default.createElement("div", {
-    className: "pin-tool-item tool-pmail"
-  }), _react.default.createElement("div", {
-    className: "pin-tool-item tool-github"
+    className: "pin-tool-item tool-github",
+    onClick: () => changetab('github.com/update')
   })), _react.default.createElement("img", {
     className: "pin-avatar",
     src: "img/Ellipse2.png"

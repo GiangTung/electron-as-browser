@@ -2,13 +2,88 @@ const { ipcRenderer } = require('electron');
 const { useEffect, useState } = require('react');
 const fs = require("fs");
 const storage = require('electron-json-storage');
+// https://www.gravatar.com/avatar/5774acd0aeb950f5e682ac9a2b3830ecfa?s=200&r=pg&d=mp
+// https://www.gravatar.com/avatar/{md5 hash of email address}
+// <img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=https%3A%2F%2Fexample.com%2Fimages%2Favatar.jpg" />
+// https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?f=y
+// https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200&r=pg&d=mp
+// request.get('https://people.googleapis.com/v1/people/me/connections?access_token=tokenHere',
+//     function (error, response, body) {
+//         console.log(body);
+//     });
+
+// $email = trim( "MyEmailAddress@example.com " ); // "MyEmailAddress@example.com"
+// $email = strtolower( $email ); // "myemailaddress@example.com"
+// echo md5( $email );
+
+// echo md5( strtolower( trim( "MyEmailAddress@example.com " ) ) );
+//https://www.adamsmith.haus/python/answers/how-to-get-session-cookies-from-a-website-in-python
+
+const tasks_initial = [
+  {
+    title:"Moana Wells",
+    status : "Guitar jams w/ Mark at McCabe’s",
+    desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
+    time : "2:40 PM",
+    icon : "img/task_list/jira.png",
+    href: 'http://www.google.com'
+  },
+  {
+    title:"Youtube",
+    status : "Guitar jams w/ Mark at McCabe’s",
+    desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
+    time : "1:50 PM",
+    icon : "img/task_list/link.png",
+    href: 'http://www.youtube.com'
+  },{
+    title:"Mark Mills",
+    status : "Guitar jams w/ Mark at McCabe’s",
+    desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
+    time : "1:20 PM",
+    icon : "img/task_list/jira.png",
+    href: 'http://www.google.com'
+  },{
+    title:"Jira | DELT 181",
+    status : "Guitar jams w/ Mark at McCabe’s",
+    desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
+    time : "12:40 PM",
+    icon : "img/task_list/jira.png",
+    href: 'http://www.google.com'
+  },{
+    title:"Discord | Honeydu",
+    status : "From: Shan Shah",
+    desc:"@devin what are the name servers for Digital Ocean?",
+    time : "11:40 PM",
+    icon : "img/task_list/discord.png",
+    href: 'http://www.google.com'
+  },{
+    title:"Github | Honeydu",
+    status : "Repo: Mobile      Commit: 6weFwer",
+    desc:"@devin should we change this method to be async?",
+    time : "1:50 AM",
+    icon : "img/task_list/github.png",
+    href: 'http://www.github.com'
+  }
+];
+const leftTabs_initial = [
+  { icon: "fruit", func: "none" },
+  { icon: "brain", func: "none" },
+  { icon: "face", func: "none" },
+  { icon: "star", func: "none" },
+];
 
 storage.setDataPath('d:\\');
 storage.get('task', function(error, data) {
   if (error) throw error;
-  tasks_initial = data;
+   tasks_initial = data;
   // alert(JSON.stringify(tasks_initial));
 }); 
+storage.get('leftTab', function(error, data) {
+  if (error) throw error;
+   leftTabs_initial = data;
+  // alert(JSON.stringify(tasks_initial));
+}); 
+
 
 
   // Do something with the file
@@ -30,63 +105,14 @@ const noop = () => {};
  */
 module.exports = function useConnect(options = {}) {
  
-  
-  const tasks_initial = [
-    {
-      title:"Moana Wells",
-      status : "Guitar jams w/ Mark at McCabe’s",
-      desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time : "2:40 PM",
-      icon : "img/task_list/jira.png",
-      href: 'http://www.google.com'
-    },
-    {
-      title:"Youtube",
-      status : "Guitar jams w/ Mark at McCabe’s",
-      desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time : "1:50 PM",
-      icon : "img/task_list/link.png",
-      href: 'http://www.youtube.com'
-    },{
-      title:"Mark Mills",
-      status : "Guitar jams w/ Mark at McCabe’s",
-      desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time : "1:20 PM",
-      icon : "img/task_list/jira.png",
-      href: 'http://www.google.com'
-    },{
-      title:"Jira | DELT 181",
-      status : "Guitar jams w/ Mark at McCabe’s",
-      desc:"Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time : "12:40 PM",
-      icon : "img/task_list/jira.png",
-      href: 'http://www.google.com'
-    },{
-      title:"Discord | Honeydu",
-      status : "From: Shan Shah",
-      desc:"@devin what are the name servers for Digital Ocean?",
-      time : "11:40 PM",
-      icon : "img/task_list/discord.png",
-      href: 'http://www.google.com'
-    },{
-      title:"Github | Honeydu",
-      status : "Repo: Mobile      Commit: 6weFwer",
-      desc:"@devin should we change this method to be async?",
-      time : "1:50 AM",
-      icon : "img/task_list/github.png",
-      href: 'http://www.github.com'
-    }
-  ];
-  const leftTabs_initial = [
-    { icon: "fruit", func: "none" },
-    { icon: "brain", func: "none" },
-    { icon: "face", func: "none" },
-    { icon: "star", func: "none" },
-  ];
+
+
+
   const addLefttab = (v) => {
     let temp = leftTabs;
     temp.push(v);
     setleftTabs(temp);
+    storage.set('leftTab', temp);
     // alert(JSON.stringify(leftTabs));
   }
   const get_tasks = () => {
@@ -111,12 +137,12 @@ module.exports = function useConnect(options = {}) {
   // fs.open('1.txt', 'w+');
   // fs.read('1.txt',data);
   const countReducers = (state, event) => {   
-    var tmp_task;
-    storage.get('task', function(error, data) {
+    var tmp_leftTab;
+    storage.get('leftTab', function(error, data) {
       // alert("data:"+JSON.stringify(data));
       if (error) throw error;
       aa = data;
-      setTasks(data);
+      setleftTabs(data);
       // alert("tasks:"+JSON.stringify(data));
       // console.log(data);
    
@@ -125,7 +151,7 @@ module.exports = function useConnect(options = {}) {
         // alert("aa:"+JSON.stringify(aa));
         return {
           ...state,
-          tasks:aa
+          leftTabs:aa
         };
       default:
         return state;

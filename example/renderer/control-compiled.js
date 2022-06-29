@@ -14,10 +14,44 @@ var _useEyeDropper = _interopRequireDefault(require("use-eye-dropper"));
 
 var _useEffectReducer = require("use-effect-reducer");
 
+var _gsap = _interopRequireDefault(require("gsap"));
+
+var _ScrollTrigger = require("gsap/dist/ScrollTrigger");
+
+var _smoothScrollbar = _interopRequireDefault(require("smooth-scrollbar"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
+// const {google} = require('googleapis');
+// const people = google.people('v1');
+// async function getdata() {
+//   const auth = new google.auth.GoogleAuth({
+//     // Scopes can be specified either as an array or as a single, space-delimited string.
+//     scopes: ['https://www.googleapis.com/auth/contacts'],
+//   });
+//   // Acquire an auth client, and bind it to all future calls
+//   const authClient = await auth.getClient();
+//   google.options({auth: authClient});
+//   // Do the magic
+//   const res = await people.people.batchCreateContacts({
+//     // Request body metadata
+//     requestBody: {
+//       // request body parameters
+//       // {
+//       //   "contacts": [],
+//       //   "readMask": "my_readMask",
+//       //   "sources": []
+//       // }
+//     },
+//   });
+//   alert(JSON.stringify(res.data));
+//   // Example response
+//   // {
+//   //   "createdPeople": []
+//   // }
+// }
 const IconLoading = () => _react.default.createElement("svg", {
   viewBox: "0 0 1024 1024",
   focusable: "false",
@@ -202,7 +236,12 @@ function TaskList(props) {
   const list = props.list;
   const activeID = props.activeID;
   const setActiveTaskID = props.setActiveTaskID;
-  return _react.default.createElement("ul", {
+  return _react.default.createElement("div", {
+    className: "scroller",
+    style: {
+      height: "80vh"
+    }
+  }, _react.default.createElement("ul", {
     className: "task-ul"
   }, list.map((item, id) => _react.default.createElement(TaskItem, {
     key: id,
@@ -215,7 +254,7 @@ function TaskList(props) {
     href: item.href,
     activeID: activeID,
     setActiveTaskID: setActiveTaskID
-  })));
+  }))));
 }
 
 let show_Site = undefined;
@@ -289,49 +328,6 @@ function Control() {
     },
     tabId: 7
   };
-  const tasks_initial = [{
-    title: "Moana Wells",
-    status: "Guitar jams w/ Mark at McCabe’s",
-    desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-    time: "2:40 PM",
-    icon: "img/task_list/jira.png",
-    href: "http://www.google.com"
-  }, {
-    title: "Youtube",
-    status: "Guitar jams w/ Mark at McCabe’s",
-    desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-    time: "1:50 PM",
-    icon: "img/task_list/link.png",
-    href: "http://www.youtube.com"
-  }, {
-    title: "Mark Mills",
-    status: "Guitar jams w/ Mark at McCabe’s",
-    desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-    time: "1:20 PM",
-    icon: "img/task_list/jira.png",
-    href: "http://www.google.com"
-  }, {
-    title: "Jira | DELT 181",
-    status: "Guitar jams w/ Mark at McCabe’s",
-    desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-    time: "12:40 PM",
-    icon: "img/task_list/jira.png",
-    href: "http://www.google.com"
-  }, {
-    title: "Discord | Honeydu",
-    status: "From: Shan Shah",
-    desc: "@devin what are the name servers for Digital Ocean?",
-    time: "11:40 PM",
-    icon: "img/task_list/discord.png",
-    href: "http://www.google.com"
-  }, {
-    title: "Github | Honeydu",
-    status: "Repo: Mobile      Commit: 6weFwer",
-    desc: "@devin should we change this method to be async?",
-    time: "1:50 AM",
-    icon: "img/task_list/github.png",
-    href: "http://www.github.com"
-  }];
   const task_type = {
     title: "Jira | DELT 181",
     status: "Guitar jams w/ Mark at McCabe’s",
@@ -349,7 +345,8 @@ function Control() {
     leftTabs,
     setLeftTabs,
     getTasks,
-    countReducer
+    countReducer,
+    changeTask
   } = (0, _useConnect.default)();
   const [activeSiteID, setActiveSiteID] = (0, _react.useState)(0);
   const [activeTaskID, setActiveTaskID] = (0, _react.useState)(0);
@@ -357,7 +354,7 @@ function Control() {
   const [tempID, setTempID] = (0, _react.useState)(0);
   const [sites, setSites] = (0, _react.useState)(sites_initial);
   const [state, dispatch] = (0, _useEffectReducer.useEffectReducer)(countReducer, {
-    tasks: (0, _useConnect.default)().tasks
+    leftTabs: (0, _useConnect.default)().leftTabs
   }); // const [tasks, setTasks] = useState(tasks_initial);
 
   console.log(tabs);
@@ -390,16 +387,8 @@ function Control() {
   };
 
   const onUrlChange = e => {
-    // alert('url changed!');
-    // Sync to tab config
-    const v = e.target.value; // var cur_site = {
-    // value : v,
-    // icon : "df"
-    //     }
-    // console.log(v);
-    // console.log(cur_site);
-
-    action.sendChangeURL(v); // setCurrent_Url(cur_site);
+    const v = e.target.value;
+    action.sendChangeURL(v);
   };
 
   const onPressEnter = e => {
@@ -416,12 +405,6 @@ function Control() {
   };
 
   const changetab = new_url => {
-    // alert(new_url);
-    // url = new_TabUrl;
-    // alert(url);
-    // action.sendReload();
-    // action.sendChangeURL(new_TabUrl);
-    // action.sendEnterURL(new_TabUrl);
     if (!/^.*?:\/\//.test(new_url)) {
       new_url = `http://${new_url}`;
     }
@@ -473,22 +456,28 @@ function Control() {
     console.log('------------------------------'); // console.log(leftTabs);
 
     console.log('------------------------------');
-    console.log(leftTabs); // alert('ddd');
+    console.log(leftTabs);
+    action.sendReload();
+  };
 
-    action.sendReload(); // alert(JSON.stringify(useConnect().tasks));
-  }; // const[seconds, setSeconds] = useState(300);
-  //Now as soon as the time in given two states is zero, remove the interval.
-  // alert('sdfsf');
-
+  const addTask = () => {
+    let task_type = {
+      title: title,
+      status: "From: Shan Shah",
+      desc: "@devin what are the name servers for Digital Ocean?",
+      time: new Date().getTime.toString(),
+      icon: favicon,
+      href: href
+    };
+    changeTask(task_type);
+    action.sendReload();
+  };
 
   (0, _react.useEffect)(() => {
     let interval = setInterval(() => {
-      // setSeconds(seconds => seconds -1);
       dispatch('INC');
-    }, 500); // clearInterval(interval);
-  }, []); // function reset() {
-  //   setSeconds(300); 
-  // } 
+    }, 300);
+  }, []);
 
   const setLeftID = id => {
     console.log("setLeftID", id);
@@ -497,7 +486,9 @@ function Control() {
   };
 
   const createNewTab = () => {
-    action.sendNewTab();
+    var new_url = 'https:\\www.google.com';
+    action.sendEnterURL(new_url);
+    action.sendChangeURL(''); // action.sendNewTab();
   };
 
   const goback = () => {
@@ -517,15 +508,82 @@ function Control() {
   };
 
   const clipboardLink = url => {
-    navigator.clipboard.writeText(url); // alert("Clipboard correctly");
-
+    navigator.clipboard.writeText(url);
     action.sendLink(url);
   };
 
   const quit = () => {
     console.log("quit------------");
     action.quit();
+  }; // const onSignIn = (googleUser) =>  {
+  //   var profile = googleUser.getBasicProfile();
+  //   alert('sign in');
+  //   console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+  //   console.log('Name: ' + profile.getName());
+  //   console.log('Image URL: ' + profile.getImageUrl());
+  //   console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+  // }
+  // const signOut = () => {
+  //   var auth2 = gapi.auth2.getAuthInstance();
+  //   alert('sign out');
+  //   auth2.signOut().then( () => {
+  //     console.log('User signed out.');
+  //   });
+  // }
+  // state = {
+  //   disableScroll: false,
+  //   noDefaultStyles: false
+  // };
+
+
+  const [scrollBarCreated, setScrollBarCreated] = (0, _react.useState)(false);
+  const [toggle_bar, setToggle_bar] = (0, _react.useState)(false);
+  const scroller = (0, _react.useRef)();
+  const bodyScrollBar = (0, _react.useRef)();
+  (0, _react.useEffect)(() => {
+    scroller.current = document.querySelector(".scroller1");
+    bodyScrollBar.current = _smoothScrollbar.default.init(scroller.current);
+    setScrollBarCreated(true);
+  }, []);
+  (0, _react.useEffect)(() => {
+    scroller.current = document.querySelector(".scroller");
+    bodyScrollBar.current = _smoothScrollbar.default.init(scroller.current);
+    setScrollBarCreated(true);
+  }, []);
+
+  const toggle_Hide = () => {
+    if (toggle_bar) {
+      document.getElementsByClassName(' task-bar')[0].style.width = "0";
+      setToggle_bar(!toggle_bar);
+    } else {
+      document.getElementsByClassName(' task-bar')[0].style.width = "16.8%";
+      setToggle_bar(!toggle_bar);
+    } // $("task-bar").toggle();
+
   };
+
+  (0, _react.useEffect)(() => {
+    if (scrollBarCreated) {
+      _gsap.default.registerPlugin(_ScrollTrigger.ScrollTrigger);
+
+      _ScrollTrigger.ScrollTrigger.scrollerProxy(scroller.current, {
+        scrollTop(value) {
+          if (arguments.length) {
+            bodyScrollBar.current.scrollTop = value;
+          }
+
+          return bodyScrollBar.current.scrollTop;
+        }
+
+      });
+
+      bodyScrollBar.current.addListener(_ScrollTrigger.ScrollTrigger.update);
+
+      _ScrollTrigger.ScrollTrigger.defaults({
+        scroller: scroller.current
+      });
+    }
+  }, [scrollBarCreated]); // const { disableScroll, noDefaultStyles } = this.state;
 
   return _react.default.createElement("div", {
     className: "container"
@@ -550,13 +608,13 @@ function Control() {
     className: "ctrl-bar"
   }, _react.default.createElement("div", {
     className: "ctrl-bar-unknown normal-clickable",
-    onClick: () => dispatch('INC')
+    onClick: () => toggle_Hide()
   }, _react.default.createElement("img", {
     className: "center-img",
     src: "img/unknown.png"
   })), _react.default.createElement("div", {
     className: "ctrl-bar-checker",
-    onClick: () => action.showWorkspace('ss')
+    onClick: addTask
   }), _react.default.createElement("div", {
     className: "ctrl-bar-plus normal-clickable",
     onClick: () => createNewTab()
@@ -636,6 +694,11 @@ function Control() {
   }, _react.default.createElement("div", {
     className: "left-bar"
   }, _react.default.createElement("div", {
+    className: "scroller",
+    style: {
+      height: "70vh"
+    }
+  }, _react.default.createElement("div", {
     className: "tab-bar"
   }, _react.default.createElement(_react.default.Fragment, null, leftTabs.map((item, id) => {
     const {
@@ -655,12 +718,12 @@ function Control() {
   })), _react.default.createElement("div", {
     className: "tab-plus normal-clickable",
     onClick: () => {
-      addLeftTab(), action.sendReload();
+      action.showWorkspace('ss');
     }
   }, _react.default.createElement("img", {
     className: "center-img",
     src: "img/Icon-feather-plus.png"
-  }))), _react.default.createElement("div", {
+  })))), _react.default.createElement("div", {
     className: "pin-bar"
   }, _react.default.createElement("div", {
     className: "pin-tools"
@@ -682,6 +745,11 @@ function Control() {
   }))), _react.default.createElement("div", {
     className: "st task-bar"
   }, _react.default.createElement("div", {
+    className: "scroller1",
+    style: {
+      height: "93vh"
+    }
+  }, _react.default.createElement("div", {
     className: (0, _classnames.default)("site-list", {
       none: tempID !== 0
     })
@@ -701,7 +769,7 @@ function Control() {
     list: tasks,
     activeID: activeTaskID,
     setActiveTaskID: setActiveTaskID
-  }))), _react.default.createElement("div", {
+  })))), _react.default.createElement("div", {
     className: "content-body"
   }, _react.default.createElement("div", {
     className: "st content-workspace"

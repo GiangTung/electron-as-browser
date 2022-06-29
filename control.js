@@ -17,7 +17,7 @@ const sendChangeURL = (url) => ipcRenderer.send("url-change", url);
 const sendAct = (actName) => {
   ipcRenderer.send("act", actName);
 };
-
+const getSession = () => ipcRenderer.send('get-session');
 const sendOpenDevTool = () => {
   ipcRenderer.send("open-devtools");
 };
@@ -136,4 +136,5 @@ module.exports = {
   sendPhone,
   sendColorPick,
   sendLink,
+  getSession,
 };

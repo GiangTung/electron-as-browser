@@ -6,6 +6,68 @@ const fs = require('fs');
 const os = require('os');
 const storage = require('electron-json-storage');
 
+// const  ElectronGoogleOAuth2  = require('@getstation/electron-google-oauth2');
+
+// app.on('ready', () => {
+  
+
+
+
+// // const googleCredentials = require('oauth2');
+
+// // const  { google }  = require( "googleapis");
+
+// // const google = require('googleapis');
+// // const OAuth2 = google.auth.OAuth2;
+
+// // const CREDENTIALS = require("./credentials.json");
+
+// // var googleAuth = new OAuth2(
+// //   CREDENTIALS.web.client_id,
+// //   CREDENTIALS.web.client_secret,
+// //   CREDENTIALS.web.redirect_uris[0]
+// // );
+// // googleAuth.setCredentials({
+// //   access_token: yourAccessToken
+// // });
+// // plus.people.get({
+// //   auth: googleAuth,
+// //   userId: req.body.userID
+// // }, function (err, user) {
+// //   if( err ) { res.json( JSON.stringify( err ) );  return; }
+// //   console.log(user.emails);
+// // });
+// // Load client secrets from a local file.
+// // const  get_Auth =  () => {
+// //   const Oauth2Client = new google.auth.OAuth2(
+// //     googleCredentials.CLIENT_ID,
+// //     googleCredentials.CLIENT_SECRET,
+// //     googleCredentials.REDIRECT_URI
+// //   );
+  
+// //   const SCOPE = [
+// //     'https://www.googleapis.com/auth/userinfo.profile', // get user info
+// //     'https://www.googleapis.com/auth/userinfo.email',   // get user email ID and if its verified or not
+// //   ];
+// //   const auth_url = Oauth2Client.generateAuthUrl({
+// //     access_type: "offline",
+// //     scope: SCOPE,
+// //     prompt: "consent",
+// //     state: "GOOGLE_LOGIN",
+// //   });
+// //   // return  auth_url ;
+// //   // }
+// //   // let code = get_Auth;    // get the code from req, need to get access_token for the user 
+// //   let { tokens } = await Oauth2Client.getToken(auth_url);    // get tokens
+// //   let oauth2Client = new google.auth.OAuth2();    // create new auth client
+// //   oauth2Client.setCredentials({access_token: tokens.access_token});    // use the new auth client with the access_token
+// //   let oauth2 = google.oauth2({
+// //     auth: oauth2Client,
+// //     version: 'v2'
+// //   });
+// //   let { data } = await oauth2.userinfo.get();    // get user info
+// //   console.log(data);    // you will find name, email, picture etc. here
+// //   }
 let browser;
 let child;
 function createWindow() {
@@ -59,7 +121,15 @@ function createWindow() {
     ], function(error) {
       if (error) throw error;
     });
-
+    storage.set('leftTab', 
+    [
+      { icon: "fruit", func: "Honeydu" },
+      { icon: "brain", func: "Tasks" },
+      { icon: "face", func: "YouTube" },
+      { icon: "star", func: "Mobile" },
+    ], function(error) {
+      if (error) throw error;
+    });
   
   // console.log("+++++++++++++++++++");
   // fs.writeFile('1.txt', "1", 'utf8', function(err) {
@@ -86,7 +156,9 @@ function createWindow() {
 
 app.on('ready', async () => {
   createWindow();
+  
 });
+
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {

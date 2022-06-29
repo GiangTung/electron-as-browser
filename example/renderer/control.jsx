@@ -5,7 +5,42 @@ import useConnect from "../../useConnect";
 import * as action from "../../control";
 import useEyeDropper from "use-eye-dropper";
 import { useEffectReducer } from 'use-effect-reducer';
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import Scrollbar from "smooth-scrollbar";
 
+// const {google} = require('googleapis');
+// const people = google.people('v1');
+
+// async function getdata() {
+//   const auth = new google.auth.GoogleAuth({
+//     // Scopes can be specified either as an array or as a single, space-delimited string.
+//     scopes: ['https://www.googleapis.com/auth/contacts'],
+//   });
+
+//   // Acquire an auth client, and bind it to all future calls
+//   const authClient = await auth.getClient();
+//   google.options({auth: authClient});
+
+//   // Do the magic
+//   const res = await people.people.batchCreateContacts({
+//     // Request body metadata
+//     requestBody: {
+//       // request body parameters
+//       // {
+//       //   "contacts": [],
+//       //   "readMask": "my_readMask",
+//       //   "sources": []
+//       // }
+//     },
+//   });
+//   alert(JSON.stringify(res.data));
+
+//   // Example response
+//   // {
+//   //   "createdPeople": []
+//   // }
+// }
 
 const IconLoading = () => (
   <svg
@@ -133,6 +168,7 @@ function SiteList(props) {
   // alert('dddddddd');
   // console.log(list);
   return (
+    
     <ul className="site-ul">
       {list.map((item, id) => (
         <SiteItem
@@ -200,22 +236,24 @@ function TaskList(props) {
   const setActiveTaskID = props.setActiveTaskID;
 
   return (
-    <ul className="task-ul">
-      {list.map((item, id) => (
-        <TaskItem
-          key={id}
-          id={id}
-          icon={item.icon}
-          title={item.title}
-          status={item.status}
-          desc={item.desc}
-          time={item.time}
-          href={item.href}
-          activeID={activeID}
-          setActiveTaskID={setActiveTaskID}
-        />
-      ))}
-    </ul>
+    <div className="scroller" style={{ height: "80vh" }}>
+      <ul className="task-ul">
+        {list.map((item, id) => (
+          <TaskItem
+            key={id}
+            id={id}
+            icon={item.icon}
+            title={item.title}
+            status={item.status}
+            desc={item.desc}
+            time={item.time}
+            href={item.href}
+            activeID={activeID}
+            setActiveTaskID={setActiveTaskID}
+          />
+        ))}
+      </ul>
+    </div>
   );
 }
 let show_Site = undefined;
@@ -277,56 +315,7 @@ function Control() {
       url: "https://www.google.com/"},
       tabId:7
   };
-  const tasks_initial = [
-    {
-      title: "Moana Wells",
-      status: "Guitar jams w/ Mark at McCabe’s",
-      desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time: "2:40 PM",
-      icon: "img/task_list/jira.png",
-      href: "http://www.google.com",
-    },
-    {
-      title: "Youtube",
-      status: "Guitar jams w/ Mark at McCabe’s",
-      desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time: "1:50 PM",
-      icon: "img/task_list/link.png",
-      href: "http://www.youtube.com",
-    },
-    {
-      title: "Mark Mills",
-      status: "Guitar jams w/ Mark at McCabe’s",
-      desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time: "1:20 PM",
-      icon: "img/task_list/jira.png",
-      href: "http://www.google.com",
-    },
-    {
-      title: "Jira | DELT 181",
-      status: "Guitar jams w/ Mark at McCabe’s",
-      desc: "Hey, are we still meeting at the regular time for lessons Next week? Thanks!",
-      time: "12:40 PM",
-      icon: "img/task_list/jira.png",
-      href: "http://www.google.com",
-    },
-    {
-      title: "Discord | Honeydu",
-      status: "From: Shan Shah",
-      desc: "@devin what are the name servers for Digital Ocean?",
-      time: "11:40 PM",
-      icon: "img/task_list/discord.png",
-      href: "http://www.google.com",
-    },
-    {
-      title: "Github | Honeydu",
-      status: "Repo: Mobile      Commit: 6weFwer",
-      desc: "@devin should we change this method to be async?",
-      time: "1:50 AM",
-      icon: "img/task_list/github.png",
-      href: "http://www.github.com",
-    },
-  ];
+ 
   const task_type = {
     title: "Jira | DELT 181",
     status: "Guitar jams w/ Mark at McCabe’s",
@@ -336,13 +325,13 @@ function Control() {
     href: "http:\\www.google.com",
   };
 
-  const { tabs, tabIDs,tasks, activeID, addLeftTabs , leftTabs, setLeftTabs,getTasks,countReducer} = useConnect();
+  const { tabs, tabIDs,tasks, activeID, addLeftTabs , leftTabs, setLeftTabs,getTasks,countReducer,changeTask} = useConnect();
   const [activeSiteID, setActiveSiteID] = useState(0);
   const [activeTaskID, setActiveTaskID] = useState(0);
   const [activeLeftID, setActiveLeftID] = useState(0);
   const [tempID, setTempID] = useState(0);
   const [sites, setSites] = useState(sites_initial);
-  const [state, dispatch] = useEffectReducer(countReducer, {tasks:useConnect().tasks});
+  const [state, dispatch] = useEffectReducer(countReducer, {leftTabs:useConnect().leftTabs});
 
   // const [tasks, setTasks] = useState(tasks_initial);
   console.log(tabs);
@@ -368,18 +357,8 @@ function Control() {
   };
 
   const onUrlChange = (e) => {
-    // alert('url changed!');
-    // Sync to tab config
     const v = e.target.value;
-    // var cur_site = {
-    // value : v,
-    // icon : "df"
-    //     }
-    // console.log(v);
-    // console.log(cur_site);
-
     action.sendChangeURL(v);
-    // setCurrent_Url(cur_site);
   };
   const onPressEnter = (e) => {
     if (e.keyCode !== 13) return;
@@ -393,13 +372,6 @@ function Control() {
     action.sendEnterURL(href);
   };
   const changetab = (new_url) => {
-    // alert(new_url);
-    // url = new_TabUrl;
-    // alert(url);
-    // action.sendReload();
-    // action.sendChangeURL(new_TabUrl);
-    // action.sendEnterURL(new_TabUrl);
-
     if (!/^.*?:\/\//.test(new_url)) {
       new_url = `http://${new_url}`;
     }
@@ -451,28 +423,26 @@ function Control() {
     // console.log(leftTabs);
     console.log('------------------------------');
     console.log(leftTabs);
-    // alert('ddd');
     action.sendReload();
-    // alert(JSON.stringify(useConnect().tasks));
   }
-  
-  // const[seconds, setSeconds] = useState(300);
-
-
-  //Now as soon as the time in given two states is zero, remove the interval.
-// alert('sdfsf');
+  const addTask = () => {
+    let task_type = {
+      title:title,
+      status : "From: Shan Shah",
+      desc:"@devin what are the name servers for Digital Ocean?",
+      time : new Date().getTime.toString(),
+      icon : favicon,
+      href: href
+    };
+    changeTask(task_type);
+    action.sendReload();
+  }
     useEffect(() => {
         let interval = setInterval(() => {
-            // setSeconds(seconds => seconds -1);
           dispatch('INC');
-        }, 500);
-    
-        // clearInterval(interval);
+        }, 300);
     }, [])
     
-    // function reset() {
-    //   setSeconds(300); 
-    // } 
   const setLeftID = (id) => {
    
     console.log("setLeftID", id);
@@ -480,7 +450,11 @@ function Control() {
     setActiveLeftID(id);
   };
   const createNewTab = () => {
-    action.sendNewTab();
+    var new_url = 'https:\\www.google.com';
+
+    action.sendEnterURL(new_url);
+    action.sendChangeURL('');
+    // action.sendNewTab();
   };
   const goback = () => {
     action.sendGoBack();
@@ -497,14 +471,76 @@ function Control() {
 
   const clipboardLink = (url) => {
     navigator.clipboard.writeText(url);
-    // alert("Clipboard correctly");
     action.sendLink(url);
   };
   const quit = () => {
     console.log("quit------------");
     action.quit();
   };
+  // const onSignIn = (googleUser) =>  {
+  //   var profile = googleUser.getBasicProfile();
+  //   alert('sign in');
+  //   console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+  //   console.log('Name: ' + profile.getName());
+  //   console.log('Image URL: ' + profile.getImageUrl());
+  //   console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+  // }
+  // const signOut = () => {
+  //   var auth2 = gapi.auth2.getAuthInstance();
+  //   alert('sign out');
+  //   auth2.signOut().then( () => {
+  //     console.log('User signed out.');
+  //   });
+  // }
+  // state = {
+  //   disableScroll: false,
+  //   noDefaultStyles: false
+  // };
+  const [scrollBarCreated, setScrollBarCreated] = useState(false);
+  const [toggle_bar, setToggle_bar] = useState(false);
+  const scroller = useRef();
+  const bodyScrollBar = useRef();
 
+  useEffect(() => {
+    scroller.current = document.querySelector(".scroller1");
+    bodyScrollBar.current = Scrollbar.init(scroller.current);
+    setScrollBarCreated(true);
+  }, []);
+  useEffect(() => {
+    scroller.current = document.querySelector(".scroller");
+    bodyScrollBar.current = Scrollbar.init(scroller.current);
+    setScrollBarCreated(true);
+  }, []);
+  const toggle_Hide = () => {
+    if(toggle_bar){
+      document.getElementsByClassName(' task-bar')[0].style.width = "0";
+      setToggle_bar(!toggle_bar);
+    }
+    else{
+      document.getElementsByClassName(' task-bar')[0].style.width = "16.8%";
+      setToggle_bar(!toggle_bar);
+    }
+    // $("task-bar").toggle();
+
+  }
+  useEffect(() => {
+    if (scrollBarCreated) {
+      gsap.registerPlugin(ScrollTrigger);
+      ScrollTrigger.scrollerProxy(scroller.current, {
+        scrollTop(value) {
+          if (arguments.length) {
+            bodyScrollBar.current.scrollTop = value;
+          }
+          return bodyScrollBar.current.scrollTop;
+        }
+      });
+      bodyScrollBar.current.addListener(ScrollTrigger.update);
+      ScrollTrigger.defaults({ scroller: scroller.current });
+    }
+  }, [scrollBarCreated]);
+  // const { disableScroll, noDefaultStyles } = this.state;
+
+  
   return (
     <div className="container">
       <div className="st top-bar">
@@ -520,12 +556,12 @@ function Control() {
           </a>
         </div>
         <div className="ctrl-bar">
-          <div className="ctrl-bar-unknown normal-clickable" onClick={() => dispatch('INC')}>
+          <div className="ctrl-bar-unknown normal-clickable" onClick={()=>toggle_Hide()}>
             <img className="center-img" src="img/unknown.png"></img>
           </div>
           <div
             className="ctrl-bar-checker"
-            onClick={() => action.showWorkspace('ss')}
+            onClick={addTask}
           ></div>
           <div
             className="ctrl-bar-plus normal-clickable"
@@ -620,8 +656,11 @@ function Control() {
           </div>
         </div>
       </div>
+       
       <div className="body-container">
         <div className="left-bar">
+        <div className="scroller" style={{ height: "70vh" }}>
+
           <div className="tab-bar">
             <>
               {leftTabs.map((item, id) => {
@@ -642,11 +681,12 @@ function Control() {
             </>
             <div
               className="tab-plus normal-clickable"
-              onClick={() => {addLeftTab(), action.sendReload()}}
+              onClick={() => {action.showWorkspace('ss')}}
             >
               <img className="center-img" src="img/Icon-feather-plus.png"></img>
             </div>
           </div>
+       </div>
           <div className="pin-bar">
             <div className='pin-tools'>
                 <div className='pin-tool-item tool-check' onClick={()=>setLeftID(1)}></div>
@@ -657,7 +697,9 @@ function Control() {
             <img className="pin-avatar" src="img/Ellipse2.png"></img>
           </div>
         </div>
+        
         <div className="st task-bar">
+        <div className="scroller1" style={{ height: "93vh" }}>
           <div className={cx("site-list", { none: tempID !== 0 })}>
             <div className="list-name">Honeydu</div>
             <SiteList
@@ -674,9 +716,11 @@ function Control() {
               setActiveTaskID={setActiveTaskID}
             />
           </div>
+          </div>
         </div>
         <div className="content-body">
-          <div className="st content-workspace"></div>
+          <div className="st content-workspace">
+          </div>
         </div>
       </div>
     </div>

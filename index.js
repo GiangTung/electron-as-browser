@@ -86,7 +86,7 @@ class BrowserLikeWindow extends EventEmitter {
     this.win.setMenu(null);
     this.win.maximize();
     this.win.setResizable(false);
-    this.win.openDevTools({mode: "detach"});
+    // this.win.openDevTools({mode: "detach"});
     this.defCurrentViewId = null;
     this.defTabConfigs = {};
     // Prevent browser views garbage collected
@@ -216,7 +216,9 @@ class BrowserLikeWindow extends EventEmitter {
           .catch((error) => {
             console.error("Failed to clear cache: ", error);
           });
+         
       },
+      
 
       "link-spotify": (e) => {
         let { webContents } = this.currentView;
@@ -373,7 +375,7 @@ class BrowserLikeWindow extends EventEmitter {
     });
 
     if (this.options.debug) {
-      //   this.controlView.webContents.openDevTools({ mode: "detach" });
+        this.controlView.webContents.openDevTools({ mode: "detach" });
       // this.controlView.webContents.openDevTools();
       log.transports.console.level = "debug";
     }
@@ -537,6 +539,9 @@ class BrowserLikeWindow extends EventEmitter {
         this.setTabConfig(id, { url: href, href });
         this.emit("url-updated", { view: currentView, href });
       })
+      // .on('signin', (e,authInfo)=>{
+      //   log.debug('----------------login----------------------',{authInfo});
+      // })
       .on("page-title-updated", (e, title) => {
         log.debug("page-title-updated", title);
         this.setTabConfig(id, { title });
@@ -562,13 +567,13 @@ class BrowserLikeWindow extends EventEmitter {
     this.setContentBounds();
 
     if (this.options.debug) {
-      //   webContents.openDevTools({ mode: "detach" });
+        // webContents.openDevTools({ mode: "debug" });
     }
   }
 
   openDevTools() {
     const { webContents } = this.currentView;
-    webContents.openDevTools({ mode: "right" });
+    // webContents.openDevTools({ mode: "right" });
   }
 
   setCurrentView(viewId) {
@@ -701,7 +706,7 @@ class BrowserLikeWindow extends EventEmitter {
     }
     log.debug(`${val} - showWorkspace`);
     this.workspaceWin.show();
-    this.controlView.webContents.openDevTools({ mode: "detach" });
+    // this.controlView.webContents.openDevTools({ mode: "detach" });
     this.openWorkspace = true;
   }
 

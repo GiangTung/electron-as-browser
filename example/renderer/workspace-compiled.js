@@ -32,47 +32,25 @@ function Control() {
     changeTask,
     countReducer
   } = (0, _useConnect.default)();
-  const [state, dispatch] = (0, _useEffectReducer.useEffectReducer)(countReducer, {
-    count: 0
-  });
+  const [workspaceName, setWorkspaceName] = (0, _react.useState)(''); // const [state, dispatch] = useEffectReducer(countReducer, { count: 0 });
 
-  const addTask = () => {
-    // alert('dddd');
-    let task_type = {
-      title: "Discord | Honeydu",
-      status: "From: Shan Shah",
-      desc: "@devin what are the name servers for Digital Ocean?",
-      time: "11:40 PM",
-      icon: "img/task_list/discord.png",
-      href: 'http://www.google.com'
-    }; // alert(activeID);
-    // alert(task_type.title);
-    // action.sendAddTask(task_type);
-
-    changeTask(task_type); // alert(JSON.stringify(leftTabs));
-    // action.sendReload();
-    // action.showWorkspace('add-task');
-    // alert('change task!!');
-
-    action.sendReload(); // alert('dddd');
-  }; // useEffect(()=> {
-  //   tasks = useConnect().tasks;
-  //   alert(JSON.stringify(tasks));
-  // });
-
+  const addLeftTab = () => {
+    let leftTab_type = {
+      icon: "fruit",
+      func: 'ddd'
+    };
+    addLeftTabs(leftTab_type); // action.sendReload();
+  };
 
   return _react.default.createElement("div", {
-    className: "container",
-    onClick: () => {
-      dispatch('INC');
-    }
+    className: "container"
   }, _react.default.createElement("div", {
     className: "add-workspace"
   }, _react.default.createElement("div", {
     className: "add-name"
   }, _react.default.createElement("div", {
     className: "add-plus",
-    onClick: () => addTask()
+    onClick: () => addLeftTab()
   }, _react.default.createElement("img", {
     className: "center-img",
     src: "img/workspace/plus.png"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState , useRef} from 'react';
 import ReactDOM from 'react-dom';
 import cx from 'classnames';
 import useConnect from '../../useConnect';
@@ -9,44 +9,26 @@ function Control() {
     action.showWorkspace(val);
   }
   const { tabs, tabIDs, activeID,tasks, addLeftTabs , leftTabs, setLeftTabs,changeTask,countReducer} = useConnect();
-  const [state, dispatch] = useEffectReducer(countReducer, { count: 0 });
-  const addTask = () => {
-    // alert('dddd');
-    let task_type = {
-      title:"Discord | Honeydu",
-      status : "From: Shan Shah",
-      desc:"@devin what are the name servers for Digital Ocean?",
-      time : "11:40 PM",
-      icon : "img/task_list/discord.png",
-      href: 'http://www.google.com'
+  const [workspaceName,setWorkspaceName] = useState('')
+  // const [state, dispatch] = useEffectReducer(countReducer, { count: 0 });
+
+  const addLeftTab = () => {
+    let leftTab_type = {
+       icon: "fruit", func: 'ddd' 
     };
-    // alert(activeID);
-    // alert(task_type.title);
-    // action.sendAddTask(task_type);
-    changeTask(task_type);
-    // alert(JSON.stringify(leftTabs));
+    addLeftTabs(leftTab_type);
     // action.sendReload();
-    // action.showWorkspace('add-task');
-    
-    // alert('change task!!');
-    action.sendReload();
-    // alert('dddd');
-   
   }
 
-  // useEffect(()=> {
-  //   tasks = useConnect().tasks;
-  //   alert(JSON.stringify(tasks));
-  // });
   return (
-    <div className="container" onClick={() => {dispatch('INC'),action.sendReload()}}>
+    <div className="container" >
       <div className='add-workspace'>
         <div className='add-name'>
-          <div className='add-plus' onClick={()=>addTask()}>
+          <div className='add-plus' onClick={()=>addLeftTab()}>
             <img className='center-img' src='img/workspace/plus.png'></img>
           </div>
           <div className='add-title'>
-            <input className='input-title' placeholder="Name your workspace"></input>
+            <input className='input-title'   placeholder="Name your workspace"></input>
           </div>
         </div>
         <div className='add-setting ' >

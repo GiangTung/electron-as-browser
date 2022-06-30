@@ -103,9 +103,10 @@ i.exit:hover {
 .task-bar {
 
   width: 16.8%;
+  /* width:0%; */
   height: 100%;
   overflow: hidden;
-  transition: width 0.2s;
+  /* transition: width 0.1s; */
 }
 .pin__target {
   opacity: 1;

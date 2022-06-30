@@ -43,8 +43,8 @@ const sendEmail = () => {
   ipcRenderer.send("link-gmail");
 };
 
-const sendPhone = () => {
-  ipcRenderer.send("simulate-phone");
+const sendPhone = (phoneState) => {
+  ipcRenderer.send("simulate-phone", phoneState);
 };
 
 const sendColorPick = () => {
@@ -112,7 +112,7 @@ const showWorkspace = (val) => ipcRenderer.send("show-workspace", val);
  * @param {string} [val]
  */
 const hideWorkspace = (val) => ipcRenderer.send("hide-workspace", val);
-
+const sendChangeTaskbar = () => ipcRenderer.send("ChangeTaskbar");
 const quit = () => ipcRenderer.send("close-all");
 
 module.exports = {
@@ -137,4 +137,5 @@ module.exports = {
   sendColorPick,
   sendLink,
   getSession,
+  sendChangeTaskbar,
 };

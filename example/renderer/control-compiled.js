@@ -351,6 +351,7 @@ function Control() {
   const [activeSiteID, setActiveSiteID] = (0, _react.useState)(0);
   const [activeTaskID, setActiveTaskID] = (0, _react.useState)(0);
   const [activeLeftID, setActiveLeftID] = (0, _react.useState)(0);
+  const [phoneState, setPhoneState] = (0, _react.useState)(false);
   const [tempID, setTempID] = (0, _react.useState)(0);
   const [sites, setSites] = (0, _react.useState)(sites_initial);
   const [state, dispatch] = (0, _useEffectReducer.useEffectReducer)(countReducer, {
@@ -422,6 +423,11 @@ function Control() {
     // alert(value);
     // action.sendChangeURL(value);
     // action.sendEnterURL(value);
+  };
+
+  const sendPhone = phoneState => {
+    action.sendPhone(phoneState);
+    !phoneState ? setPhoneState(true) : setPhoneState(false);
   };
 
   const addHoneydu = (title, url, favicon) => {
@@ -553,13 +559,15 @@ function Control() {
 
   const toggle_Hide = () => {
     if (toggle_bar) {
-      document.getElementsByClassName(' task-bar')[0].style.width = "0";
+      document.getElementsByClassName(' task-bar')[0].style.width = "16.8%";
       setToggle_bar(!toggle_bar);
     } else {
-      document.getElementsByClassName(' task-bar')[0].style.width = "16.8%";
+      document.getElementsByClassName(' task-bar')[0].style.width = "0%";
       setToggle_bar(!toggle_bar);
     } // $("task-bar").toggle();
 
+
+    action.sendChangeTaskbar();
   };
 
   (0, _react.useEffect)(() => {
@@ -666,7 +674,7 @@ function Control() {
     onClick: action.sendEmail
   }), _react.default.createElement("div", {
     className: "ctrl-bar-tool-item tool-phone",
-    onClick: action.sendPhone
+    onClick: () => sendPhone(phoneState)
   }), _react.default.createElement("div", {
     className: "ctrl-bar-tool-item tool-camera",
     onClick: () => action.sendScreenshot(url)

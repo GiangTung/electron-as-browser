@@ -17,7 +17,7 @@ function Control() {
        icon: "fruit", func: 'ddd' 
     };
     addLeftTabs(leftTab_type);
-    // action.sendReload();
+    action.sendReload();
   }
 
   return (

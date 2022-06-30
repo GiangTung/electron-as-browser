@@ -39,7 +39,8 @@ function Control() {
       icon: "fruit",
       func: 'ddd'
     };
-    addLeftTabs(leftTab_type); // action.sendReload();
+    addLeftTabs(leftTab_type);
+    action.sendReload();
   };
 
   return _react.default.createElement("div", {

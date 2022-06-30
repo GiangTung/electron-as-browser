@@ -6,6 +6,10 @@ const fs = require('fs');
 const os = require('os');
 const storage = require('electron-json-storage');
 
+// const localStorage = require('localStorage');
+
+
+
 // const  ElectronGoogleOAuth2  = require('@getstation/electron-google-oauth2');
 
 // app.on('ready', () => {
@@ -71,7 +75,7 @@ const storage = require('electron-json-storage');
 let browser;
 let child;
 function createWindow() {
-  storage.setDataPath('d:\\');
+  storage.setDataPath('D:\\');
     storage.set('task', 
     [
       {
@@ -130,7 +134,7 @@ function createWindow() {
     ], function(error) {
       if (error) throw error;
     });
-  
+
   // console.log("+++++++++++++++++++");
   // fs.writeFile('1.txt', "1", 'utf8', function(err) {
   //   if(err) {

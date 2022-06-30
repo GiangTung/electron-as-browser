@@ -6,7 +6,6 @@ const {
   session,
   dialog,
   Notification,
-  ipcRenderer,
 } = require("electron");
 const EventEmitter = require("events");
 const log = require("electron-log");
@@ -25,12 +24,10 @@ const mobileEnv = [
   {
     _hSightEnv: 0.081,
     _wSightEnv: 0.2954,
+    _widthEnv: 0.2437,
     _heightEnv: 0.0962,
   },
 ];
-
-const setPos = [0.05,0.1797];
-var posnum = 1;
 
 log.transports.file.level = false;
 log.transports.console.level = false;
@@ -104,6 +101,7 @@ class BrowserLikeWindow extends EventEmitter {
     this.win.setMenu(null);
     this.win.maximize();
     this.win.setResizable(false);
+    // this.win.openDevTools({mode: "detach"});
     this.defCurrentViewId = null;
     this.defTabConfigs = {};
     // Prevent browser views garbage collected
@@ -112,7 +110,7 @@ class BrowserLikeWindow extends EventEmitter {
     this.tabs = [];
     // ipc channel
     this.ipc = null;
-    //workspace
+
     const parentBounds = this.getControlBounds(0);
     const contentWinBounds = this.win.getContentBounds();
     const contentWidth = contentWinBounds.width;
@@ -156,7 +154,7 @@ class BrowserLikeWindow extends EventEmitter {
 
     this.workspaceWin.setBackgroundColor("#aa333333");
     this.workspaceWin.setMenu(null);
-    this.workspaceWin.setResizable(true);
+    this.workspaceWin.setResizable(false);
     this.openWorkspace = false;
 
     this.controlView = new BrowserView({
@@ -171,8 +169,8 @@ class BrowserLikeWindow extends EventEmitter {
 
     // BrowserView should add to window before setup
     this.win.addBrowserView(this.controlView);
-    this.controlView.setBounds(this.getControlBounds(0));
-    this.controlView.setAutoResize( { width: true, height: true } );
+    this.controlView.setBounds(this.getControlBounds());
+    this.controlView.setAutoResize({ width: true });
     this.controlView.webContents.loadURL(controlPanel);
 
     const webContentsAct = (actionName) => {
@@ -180,14 +178,15 @@ class BrowserLikeWindow extends EventEmitter {
       const action = webContents && webContents[actionName];
       if (typeof action === "function") {
         if (actionName === "reload" && webContents.getURL() === "") return;
+        // webContents = this.controlView.webContents;
+        log.debug('$$$$$$$$$',this.currentViewId,'$$$$$$$$$$$$$')
         action.call(webContents);
-        log.debug(
-          "----------------",
+        log.debug('----------------',
           `do webContents action ${actionName} for ${this.currentViewId}:${
             webContents && webContents.getTitle()
-          }`,
-          "------------"
+          }`,'------------'
         );
+        // log.debug('-----------------------------------------',webContents,'-----------------------------------------');
       } else {
         log.error("Invalid webContents action ", actionName);
       }
@@ -208,6 +207,8 @@ class BrowserLikeWindow extends EventEmitter {
       },
       "url-change": (e, url) => {
         this.setTabConfig(this.currentViewId, { url });
+        //  console.log('ddd');
+        // log.debug('ddd??');
       },
       "url-enter": (e, url) => {
         this.loadURL(url);
@@ -230,13 +231,9 @@ class BrowserLikeWindow extends EventEmitter {
           .catch((error) => {
             console.error("Failed to clear cache: ", error);
           });
-        const NOTIFICATION_BODY = "Specific browser Message";
-        const NOTIFICATION_TITLE = `All  Cookies Deleted!`;
-        new Notification({
-          title: NOTIFICATION_TITLE,
-          body: NOTIFICATION_BODY,
-        }).show();
+         
       },
+      
 
       "link-spotify": (e) => {
         let { webContents } = this.currentView;
@@ -251,26 +248,17 @@ class BrowserLikeWindow extends EventEmitter {
         webContents.loadURL(mailURL);
         console.log(mailURL);
       },
-
       "simulate-phone": (e, phoneState) => {
         console.log("phone");
         console.log("phone");
         !phoneState ? this.setContentBounds(1) : this.setContentBounds(0);
       },
 
+
       "pick-colorize": (e) => {
         console.log("colorize");
       },
-      "ChangeTaskbar":(e)=>
-      {
-        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-        if(posnum == 1) 
-           posnum = 0;
-        else 
-          posnum = 1;
-        this.setContentBounds(0);
-        // this.posnum = 0;
-      },
+
       "link-bitly": (e, url) => {
         const NOTIFICATION_BODY = "Clipboard Message";
         const NOTIFICATION_TITLE = `Clipboard  correctly done!\n url:${url}`;
@@ -304,6 +292,7 @@ class BrowserLikeWindow extends EventEmitter {
             if (!response.canceled) {
               // handle fully qualified file name
               const savePath = response.filePath;
+              // const size = electron.screen.getPrimaryDisplay().workAreaSize;
               console.log(":::Save path", savePath);
               console.log(":::Screen Size", contentWidth, contentHeight);
               puppeteer
@@ -315,7 +304,7 @@ class BrowserLikeWindow extends EventEmitter {
                 })
                 .then(async (browser) => {
                   const page = await browser.newPage();
-                  await page.goto(url);
+                  await page.goto(savePath);
                   await page.screenshot({
                     path: savePath,
                   });
@@ -371,10 +360,12 @@ class BrowserLikeWindow extends EventEmitter {
             log.debug(`Trigger ${name} from ${e.sender.id}`);
             listener(e, ...args);
           }
-          else{
-            this.controlView.webContents.send('reload');
-          }
-        },
+          // else{
+          //   this.currentViewId = 6;
+          //   e.sender = this.controlView.webContents;
+          //   listener(e,...args);
+          // }
+        }
       ])
       .forEach(([name, listener]) => ipcMain.on(name, listener));
 
@@ -412,7 +403,7 @@ class BrowserLikeWindow extends EventEmitter {
    *
    * @returns {Bounds} Bounds of control view(exclude window's frame)
    */
-  getControlBounds = (env) => {
+   getControlBounds = (env) => {
     const contentBounds = this.win.getContentBounds();
     return {
       x: 0,
@@ -426,7 +417,7 @@ class BrowserLikeWindow extends EventEmitter {
           contentBounds.height * mobileEnv[env]._hSightEnv
       ),
       wSight: Math.round(
-        contentBounds.width * setPos[posnum] +
+        contentBounds.width * 0.1797 +
           contentBounds.width * mobileEnv[env]._wSightEnv
       ),
     };
@@ -436,76 +427,33 @@ class BrowserLikeWindow extends EventEmitter {
    * Set web contents view's bounds automatically
    * @ignore
    */
-  setContentBounds = async (env) => {
+   setContentBounds = async (env) => {
     const controlBounds = await this.getControlBounds(env);
     const contentBounds = this.win.getContentBounds();
     const contentWidth = contentBounds.width;
     const contentHeight = contentBounds.height;
-    // var cur_width = Math.round(contentWidth) - nBorder * 2;
-    // var cur_height = contentHeight - nBorder;
-    // if(!env){
-    //   cur_width=Math.round(contentWidth) - nBorder * 2;
-    // cur_height= contentHeight - nBorder;
-    // }
-    // else{
-    //   cur_width=
-    //     Math.round(contentWidth * mobileEnv[env]._widthEnv) - nBorder * 2;
-    //     cur_height= Math.round(
-    //       contentHeight -
-    //         controlBounds.hSight -
-    //         nBorder -
-    //         contentHeight * mobileEnv[env]._heightEnv)
-    // }
-    delay(1);
-    if(!env){
-      if (this.currentView) {
-        const nBorder = 10;
-        this.currentView.setBounds({
-          x: controlBounds.x + controlBounds.wSight + nBorder,
-          y: controlBounds.y + controlBounds.hSight + nBorder,
-          // width:cur_width,
-          // height:cur_height,
-          // width: Math.round(contentWidth * 0.8203) - nBorder * 2,
-          width:
-            Math.round(contentWidth) - nBorder,
-          height: contentHeight - nBorder,
-          // width:
-          // Math.round(contentWidth * mobileEnv[env]._widthEnv) - nBorder * 2,
-          // height: Math.round(
-          //   contentHeight -
-          //     controlBounds.hSight -
-          //     nBorder -
-          //     contentHeight * mobileEnv[env]._heightEnv
-          // ),
-        });
-      }
-    }
-    else{
-      if (this.currentView) {
-        const nBorder = 10;
-        this.currentView.setBounds({
-          x: controlBounds.x + controlBounds.wSight + nBorder,
-          y: controlBounds.y + controlBounds.hSight + nBorder,
-          // width:cur_width,
-          // height:cur_height,
-          // width: Math.round(contentWidth * 0.8203) - nBorder * 2,
-          // width:
-          //   Math.round(contentWidth) - nBorder * 2,
-          // height: contentHeight - nBorder,
-          width:
+    if (this.currentView) {
+      const nBorder = 10;
+      this.currentView.setBounds({
+        x: controlBounds.x + controlBounds.wSight + nBorder,
+        y: controlBounds.y + controlBounds.hSight + nBorder,
+        // width: Math.round(contentWidth * 0.8203) - nBorder * 2,
+        width:
           Math.round(contentWidth * mobileEnv[env]._widthEnv) - nBorder * 2,
-          height: Math.round(
-            contentHeight -
-              controlBounds.hSight -
-              nBorder -
-              contentHeight * mobileEnv[env]._heightEnv
-          ),
-        });
-      }
+        height: contentHeight - controlBounds.hSight - nBorder,
+        height: Math.round(
+          contentHeight -
+            controlBounds.hSight -
+            nBorder -
+            contentHeight * mobileEnv[env]._heightEnv
+        ),
+      });
     }
   };
 
+
   get currentView() {
+    log.debug('@@@@@@',this.currentViewId,'@@@@@@@@@@');
     return this.currentViewId ? this.views[this.currentViewId] : null;
   }
 
@@ -517,6 +465,7 @@ class BrowserLikeWindow extends EventEmitter {
   // The most important thing to remember about the get keyword is that it defines an accessor property,
   // rather than a method. So, it can’t have the same name as the data property that stores the value it accesses.
   get currentViewId() {
+
     return this.defCurrentViewId;
   }
 
@@ -624,6 +573,9 @@ class BrowserLikeWindow extends EventEmitter {
         this.setTabConfig(id, { url: href, href });
         this.emit("url-updated", { view: currentView, href });
       })
+      // .on('signin', (e,authInfo)=>{
+      //   log.debug('----------------login----------------------',{authInfo});
+      // })
       .on("page-title-updated", (e, title) => {
         log.debug("page-title-updated", title);
         this.setTabConfig(id, { title });
@@ -636,8 +588,8 @@ class BrowserLikeWindow extends EventEmitter {
         log.debug("did-stop-loading", { title: webContents.getTitle() });
         this.setTabConfig(id, { isLoading: false });
       })
-      .on("reload", () => {
-        log.debug("reloading....");
+      .on('reload', () => {
+        log.debug('reloading....');
       })
       .on("dom-ready", () => {
         webContents.focus();
@@ -649,13 +601,13 @@ class BrowserLikeWindow extends EventEmitter {
     this.setContentBounds(0);
 
     if (this.options.debug) {
-        webContents.openDevTools({ mode: "detach" });
+        // webContents.openDevTools({ mode: "debug" });
     }
   }
 
   openDevTools() {
     const { webContents } = this.currentView;
-    webContents.openDevTools({ mode: "right" });
+    // webContents.openDevTools({ mode: "right" });
   }
 
   setCurrentView(viewId) {
@@ -788,7 +740,7 @@ class BrowserLikeWindow extends EventEmitter {
     }
     log.debug(`${val} - showWorkspace`);
     this.workspaceWin.show();
-    this.controlView.webContents.openDevTools({ mode: "detach" });
+    // this.controlView.webContents.openDevTools({ mode: "detach" });
     this.openWorkspace = true;
   }
 

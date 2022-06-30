@@ -2,6 +2,7 @@ const { ipcRenderer } = require('electron');
 const { useEffect, useState } = require('react');
 const fs = require("fs");
 const storage = require('electron-json-storage');
+const os = require('os');
 // https://www.gravatar.com/avatar/5774acd0aeb950f5e682ac9a2b3830ecfa?s=200&r=pg&d=mp
 // https://www.gravatar.com/avatar/{md5 hash of email address}
 // <img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=https%3A%2F%2Fexample.com%2Fimages%2Favatar.jpg" />
@@ -72,7 +73,7 @@ const leftTabs_initial = [
   { icon: "star", func: "none" },
 ];
 
-storage.setDataPath('d:\\');
+storage.setDataPath("D:\\");
 storage.get('task', function(error, data) {
   if (error) throw error;
    tasks_initial = data;

@@ -329,6 +329,7 @@ function Control() {
   const [activeSiteID, setActiveSiteID] = useState(0);
   const [activeTaskID, setActiveTaskID] = useState(0);
   const [activeLeftID, setActiveLeftID] = useState(0);
+  const [phoneState, setPhoneState] = useState(false);
   const [tempID, setTempID] = useState(0);
   const [sites, setSites] = useState(sites_initial);
   const [state, dispatch] = useEffectReducer(countReducer, {leftTabs:useConnect().leftTabs});
@@ -389,6 +390,10 @@ function Control() {
     // alert(value);
     // action.sendChangeURL(value);
     // action.sendEnterURL(value);
+  };
+  const sendPhone = (phoneState) => {
+    action.sendPhone(phoneState);
+    !phoneState ? setPhoneState(true) : setPhoneState(false);
   };
 
   const addHoneydu = (title, url, favicon) => {
@@ -513,14 +518,15 @@ function Control() {
   }, []);
   const toggle_Hide = () => {
     if(toggle_bar){
-      document.getElementsByClassName(' task-bar')[0].style.width = "0";
-      setToggle_bar(!toggle_bar);
-    }
-    else{
       document.getElementsByClassName(' task-bar')[0].style.width = "16.8%";
       setToggle_bar(!toggle_bar);
     }
+    else{
+      document.getElementsByClassName(' task-bar')[0].style.width = "0%";
+      setToggle_bar(!toggle_bar);
+    }
     // $("task-bar").toggle();
+    action.sendChangeTaskbar();
 
   }
   useEffect(() => {
@@ -539,7 +545,6 @@ function Control() {
     }
   }, [scrollBarCreated]);
   // const { disableScroll, noDefaultStyles } = this.state;
-
   
   return (
     <div className="container">
@@ -623,7 +628,7 @@ function Control() {
             ></div>
             <div
               className="ctrl-bar-tool-item tool-phone"
-              onClick={action.sendPhone}
+              onClick={() => sendPhone(phoneState)}
             ></div>
             <div
               className="ctrl-bar-tool-item tool-camera"

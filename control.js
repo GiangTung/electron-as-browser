@@ -112,7 +112,11 @@ const showWorkspace = (val) => ipcRenderer.send("show-workspace", val);
  * @param {string} [val]
  */
 const hideWorkspace = (val) => ipcRenderer.send("hide-workspace", val);
-const sendChangeTaskbar = () => ipcRenderer.send("ChangeTaskbar");
+/**
+ * Close the workspace panel
+ * @param {Number} [val]
+ */
+const sendChangeTaskbar = (val) => ipcRenderer.send("ChangeTaskbar",val);
 const quit = () => ipcRenderer.send("close-all");
 
 module.exports = {

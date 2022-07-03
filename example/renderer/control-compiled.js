@@ -219,7 +219,7 @@ function TaskItem(props) {
   }, _react.default.createElement("img", {
     className: "container-img",
     src: icon
-  })), _react.default.createElement("div", {
+  })), _react.default.createElement("br", null), _react.default.createElement("div", {
     className: "task-item-title"
   }, _react.default.createElement("p", {
     className: "line-normal"
@@ -468,7 +468,7 @@ function Control() {
 
   const addTask = () => {
     let task_type = {
-      title: title,
+      title: title + ' | ' + href.slice(12),
       status: "From: Shan Shah",
       desc: "@devin what are the name servers for Digital Ocean?",
       time: new Date().getTime.toString(),
@@ -561,13 +561,19 @@ function Control() {
     if (toggle_bar) {
       document.getElementsByClassName(' task-bar')[0].style.width = "16.8%";
       setToggle_bar(!toggle_bar);
+      action.sendChangeTaskbar(1);
     } else {
       document.getElementsByClassName(' task-bar')[0].style.width = "0%";
       setToggle_bar(!toggle_bar);
+      action.sendChangeTaskbar(0);
     } // $("task-bar").toggle();
 
+  };
 
-    action.sendChangeTaskbar();
+  const show_Taskbar = () => {
+    document.getElementsByClassName(' task-bar')[0].style.width = "16.8%";
+    setToggle_bar(!toggle_bar);
+    action.sendChangeTaskbar(1);
   };
 
   (0, _react.useEffect)(() => {
@@ -718,7 +724,9 @@ function Control() {
       className: (0, _classnames.default)("tab-item", {
         active: id === activeLeftID
       }),
-      onClick: () => setLeftID(id)
+      onClick: () => {
+        show_Taskbar(), setLeftID(id);
+      }
     }, _react.default.createElement("img", {
       className: "container-img",
       src: `img/left_bar/${icon}.png`

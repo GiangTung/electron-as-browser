@@ -261,13 +261,14 @@ class BrowserLikeWindow extends EventEmitter {
       "pick-colorize": (e) => {
         console.log("colorize");
       },
-      "ChangeTaskbar":(e)=>
+      "ChangeTaskbar":(e,ddd)=>
       {
         console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-        if(posnum == 1) 
-           posnum = 0;
-        else 
-          posnum = 1;
+        // if(posnum == 1) 
+        //    posnum = 0;
+        // else 
+        //   posnum = 1;
+        posnum = ddd;
         this.setContentBounds(0);
         // this.posnum = 0;
       },
@@ -372,7 +373,8 @@ class BrowserLikeWindow extends EventEmitter {
             listener(e, ...args);
           }
           else{
-            this.controlView.webContents.send('reload');
+            log.debug('#########################################');
+            this.showWorkspace('ddd');
           }
         },
       ])
@@ -456,7 +458,7 @@ class BrowserLikeWindow extends EventEmitter {
     //         nBorder -
     //         contentHeight * mobileEnv[env]._heightEnv)
     // }
-    delay(1);
+
     if(!env){
       if (this.currentView) {
         const nBorder = 10;

@@ -17,8 +17,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
 function Control() {
-  const showWorkspace = val => {
-    action.showWorkspace(val);
+  const showWorkspace = () => {
+    action.hide_work();
   };
 
   const {
@@ -46,6 +46,11 @@ function Control() {
   return _react.default.createElement("div", {
     className: "container"
   }, _react.default.createElement("div", {
+    className: "close",
+    onClick: () => {
+      action.sendReload();
+    }
+  }), _react.default.createElement("div", {
     className: "add-workspace"
   }, _react.default.createElement("div", {
     className: "add-name"

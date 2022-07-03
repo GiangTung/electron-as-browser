@@ -6,8 +6,10 @@ const { ipcRenderer } = require("electron");
  * Tell browser view to load url
  * @param {string} url
  */
+
 const sendEnterURL = (url) => ipcRenderer.send("url-enter", url);
 const sendNewsite = () => {};
+const hide_work = () => ipcRenderer.send('hide-work');
 /**
  * Tell browser view url in address bar changed
  * @param {string} url
@@ -112,7 +114,11 @@ const showWorkspace = (val) => ipcRenderer.send("show-workspace", val);
  * @param {string} [val]
  */
 const hideWorkspace = (val) => ipcRenderer.send("hide-workspace", val);
-const sendChangeTaskbar = () => ipcRenderer.send("ChangeTaskbar");
+/**
+ * Close the workspace panel
+ * @param {Number} [val]
+ */
+const sendChangeTaskbar = (val) => ipcRenderer.send("ChangeTaskbar",val);
 const quit = () => ipcRenderer.send("close-all");
 
 module.exports = {
@@ -138,4 +144,5 @@ module.exports = {
   sendLink,
   getSession,
   sendChangeTaskbar,
+  hide_work
 };

@@ -5,7 +5,14 @@ const BrowserLikeWindow = require('../index');
 const fs = require('fs');
 const os = require('os');
 const storage = require('electron-json-storage');
+const createDMG = require('electron-installer-dmg');
 
+async function buildDMG() {
+  await createDMG({
+    appPath: '/path/to/app.app',
+    name: 'MyApp'
+  });
+}
 // const localStorage = require('localStorage');
 
 

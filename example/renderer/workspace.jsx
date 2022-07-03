@@ -5,8 +5,8 @@ import useConnect from '../../useConnect';
 import * as action from '../../control';
 import { useEffectReducer } from 'use-effect-reducer';
 function Control() {
-  const showWorkspace = (val) => {
-    action.showWorkspace(val);
+  const showWorkspace = () => {
+    action.hide_work();
   }
   const { tabs, tabIDs, activeID,tasks, addLeftTabs , leftTabs, setLeftTabs,changeTask,countReducer} = useConnect();
   const [workspaceName,setWorkspaceName] = useState('')
@@ -22,6 +22,7 @@ function Control() {
 
   return (
     <div className="container" >
+      <div className='close' onClick = {()=>{action.sendReload()}}></div>
       <div className='add-workspace'>
         <div className='add-name'>
           <div className='add-plus' onClick={()=>addLeftTab()}>

@@ -215,6 +215,7 @@ function TaskItem(props) {
             <div className={cx("task-item-icon", icon)}>
               <img className="container-img" src={icon}></img>
             </div>
+            <br></br>
             <div className="task-item-title">
               <p className="line-normal">{title}</p>
             </div>
@@ -432,7 +433,7 @@ function Control() {
   }
   const addTask = () => {
     let task_type = {
-      title:title,
+      title:title+' | '+href.slice(12),
       status : "From: Shan Shah",
       desc:"@devin what are the name servers for Digital Ocean?",
       time : new Date().getTime.toString(),
@@ -520,14 +521,19 @@ function Control() {
     if(toggle_bar){
       document.getElementsByClassName(' task-bar')[0].style.width = "16.8%";
       setToggle_bar(!toggle_bar);
+      action.sendChangeTaskbar(1);
     }
     else{
       document.getElementsByClassName(' task-bar')[0].style.width = "0%";
       setToggle_bar(!toggle_bar);
+      action.sendChangeTaskbar(0);
     }
     // $("task-bar").toggle();
-    action.sendChangeTaskbar();
-
+  }
+  const show_Taskbar = () => {
+    document.getElementsByClassName(' task-bar')[0].style.width = "16.8%";
+    setToggle_bar(!toggle_bar);
+    action.sendChangeTaskbar(1);
   }
   useEffect(() => {
     if (scrollBarCreated) {
@@ -674,7 +680,7 @@ function Control() {
                   <div
                     key={id}
                     className={cx("tab-item", { active: id === activeLeftID })}
-                    onClick={() => setLeftID(id)}
+                    onClick={() => {show_Taskbar(), setLeftID(id)}}
                   >
                     <img
                       className="container-img"
